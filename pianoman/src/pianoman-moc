@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+export PULSE_RUNTIME_PATH="$(pwd)/home"
+export PULSE_SINK="@pulseInputSink@"
+@mocBinary@

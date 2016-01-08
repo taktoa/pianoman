@@ -1,0 +1,5 @@
+load-module module-native-protocol-unix
+load-module module-null-sink sink_name=@pulseLoopbackSink@
+load-module module-null-sink sink_name=@pulseInputSink@
+load-module module-rescue-streams
+load-module module-always-sink

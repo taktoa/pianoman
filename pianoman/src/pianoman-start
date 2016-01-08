@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set-pianoman-environment-variables "${1}"
+
+@pulseaudioBinary@ -n --use-pid-file=true -F @pulseConfig@ &
+PULSE_SINK="@pulseLoopbackSink@" \
+PULSE_SOURCE="@pulseInputSink@.monitor" \
+          @headlessTeamspeakBinary@
+@pulseaudioBinary@ -k
