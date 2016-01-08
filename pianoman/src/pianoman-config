@@ -46,13 +46,14 @@
 # --- General ------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 
+
 source @pianomanHelpers@
 
 usage () {
-    usage-header "pianoman-config [OPTION]... TEAMSPEAK-HOME" \
+    usage-header "pianoman-config TEAMSPEAK-HOME [OPTION]..." \
                  "Launch a graphical TeamSpeak so that you can " \
                  "configure the TeamSpeak settings."
-    add-param    "TEAMSPEAK-HOME" "the TeamSpeak home directory"
+    usage-param  "TEAMSPEAK-HOME" "the TeamSpeak home directory"
     help-options
     # if you want to add options in the future:
     # option       "-l" "--long" "description"
@@ -61,28 +62,23 @@ usage () {
     if test -n "${2}"; then exit "${2}"; else exit 1; fi
 }
 
-test "$#" -eq "1" || { usage "Wrong number of arguments" 1; }
-test -e "${1}"    || { usage "Path not found: ${1}"      2; }
-test -d "${1}"    || { usage "${1} is not a directory."  3; }
+test -n "${1}" || { usage "TEAMSPEAK-HOME is a required argument: ${1}" 1; }
+test -e "${1}" || { usage "Path not found: ${1}"                        2; }
+test -d "${1}" || { usage "${1} is not a directory."                    3; }
+
+TS_HOME="${1}"
+shift 1
 
 while (( $# > 1 )); do
   case "${1}" in
-    -h|--help)
-        usage "" 4
-        ;;
-    -v|--version)
-        echo "PianoMan version: @version@"
-        exit 0
-        ;;
-    *)
-        usage "Unknown option: ${1}" 5
-        bar
-        ;;
+    -h|--help)    usage "" 4;;
+    -v|--version) echo "PianoMan version: @version@"; exit 0;;
+    *)            usage "Unknown option: ${1}" 5;;
   esac
   shift 1
 done
 
-set-pianoman-environment-variables "${1}"
+set-pianoman-environment-variables "${TS_HOME}"
 
 @pulseaudioBinary@ -n --use-pid-file=true -F @pulseConfig@ &
 export PULSE_SINK="@pulseLoopbackSink@"

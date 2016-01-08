@@ -1,6 +1,83 @@
 #!/usr/bin/env bash
+# -*- mode: sh; sh-shell: bash; coding: utf-8; -*-
 
-set-pianoman-environment-variables "${1}"
+# ------------------------------------------------------------------------------
+
+# ### File: src/pianoman-start
+# #
+# ### License:
+# #
+# # Copyright © 2016 Remy Goldschmidt <taktoa@gmail.com>
+# #
+# # The MIT License
+# #  
+# # Permission is hereby granted, free of charge, to any person obtaining a copy
+# # of this software and associated documentation files (the "Software"), to
+# # deal in the Software without restriction, including without limitation the
+# # rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+# # sell copies of the Software, and to permit persons to whom the Software is
+# # furnished to do so, subject to the following conditions:
+# #  
+# # The above copyright notice and this permission notice shall be included in
+# # all copies or substantial portions of the Software.
+# #  
+# # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+# # IN THE SOFTWARE.
+# #
+# ### Created:    2016/01/08
+# #
+# ### Author:     Remy Goldschmidt <taktoa@gmail.com>
+# ### Maintainer: Remy Goldschmidt <taktoa@gmail.com>
+# ### Maintainer: Michael Bishop <cleverca22@gmail.com>
+# #
+# ### Commentary:
+# #
+# # FIXME
+# #
+# ### Code:
+
+
+# ------------------------------------------------------------------------------
+# --- General ------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
+
+source @pianomanHelpers@
+
+usage () {
+    usage-header "pianoman-start TEAMSPEAK-HOME [OPTION]..." \
+                 "Start PianoMan in headless mode."
+    usage-param  "TEAMSPEAK-HOME" "the TeamSpeak home directory"
+    help-options
+    # if you want to add options in the future:
+    # option       "-l" "--long" "description"
+    usage-footer
+    newline
+    if test -n "${2}"; then exit "${2}"; else exit 1; fi
+}
+
+test -n "${1}" || { usage "TEAMSPEAK-HOME is a required argument: ${1}" 1; }
+test -e "${1}" || { usage "Path not found: ${1}"                        2; }
+test -d "${1}" || { usage "${1} is not a directory."                    3; }
+
+TS_HOME="${1}"
+shift 1
+
+while (( $# > 1 )); do
+  case "${1}" in
+    -h|--help)    usage "" 4;;
+    -v|--version) echo "PianoMan version: @version@"; exit 0;;
+    *)            usage "Unknown option: ${1}" 5;;
+  esac
+  shift 1
+done
+
+set-pianoman-environment-variables "${TS_HOME}"
 
 @pulseaudioBinary@ -n --use-pid-file=true -F @pulseConfig@ &
 PULSE_SINK="@pulseLoopbackSink@" \

@@ -65,7 +65,14 @@ set-pianoman-environment-variables () {
 }
 
 newline () { echo; }
-usage-option () { echo "  ${1}, ${2} ${3}"; }
+
+usage-option () {
+    echo -e "  ${1}, ${2}\t${3}";
+}
+
+usage-param () {
+    echo -e "  ${1}\t${2}"
+}
 
 usage-header () {
     echo "Usage: ${1}"
