@@ -1,7 +1,7 @@
 # Build dependencies
 { clangStdenv, cmake, pkgconfig, doxygen, ninja
 # Program dependencies
-, boost, zeromq, cppzmq, libmsgpack
+, boost, zeromq, libmsgpack
 # Misc dependencies
 , guile, parallel
 }:
@@ -12,14 +12,10 @@ clangStdenv.mkDerivation rec {
   src = ./.;
 
   buildInputs = [ cmake pkgconfig ninja doxygen
-                  boost zeromq cppzmq libmsgpack
+                  boost zeromq libmsgpack
                   guile parallel ];
 
   cmakeFlags = "-GNinja";
-
-  preConfigure = ''
-      cp ${cppzmq}/include/zmq.hpp include/
-  '';
 
   buildPhase = "ninja";
 
