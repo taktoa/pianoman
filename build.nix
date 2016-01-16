@@ -1,9 +1,11 @@
 { pkgs ? import <nixpkgs> {} }:
 
 
-let cp = pkgs.callPackage;
-in (rec {
-  headlessTeamspeak = cp ./headless-teamspeak {};
-  pianoman          = cp ./pianoman { inherit headlessTeamspeak; };
-  plugin            = cp ./plugin {};
-})
+let
+  callPackage = pkgs.newScope self;
+  self = rec {
+    headlessTeamspeak = callPackage ./headless-teamspeak {};
+    pianoman          = callPackage ./pianoman {};
+    plugin            = callPackage ./plugin {};
+  };
+in self
