@@ -180,14 +180,6 @@ generate-emacs-include-path () {
 
 PROJECT_BUILD_ROOT="/home/remy/Documents/NotWork/Projects/Nix/pianoman/"
 
-enter-nix-shell () {
-    if [[ "${IN_NIX_SHELL}" != "1" ]]; then
-        nix-shell --pure -E "(import ${PROJECT_BUILD_ROOT}/shell.nix).${1}"
-    else
-        error "You are already in a nix-shell!"
-    fi
-}
-
 refresh-plugin-build () {
     if [[ -n "${1}" ]]; then
         cd "${1}" || exit
@@ -252,6 +244,14 @@ text-represents-no () {
     ACCEPTABLE=("n" "no" "nope" "never")
     ci-text-in-set "${1}" -- "${ACCEPTABLE[@]}"
     return "$?"
+}
+
+enter-nix-shell () {
+    if [[ "${IN_NIX_SHELL}" != "1" ]]; then
+        nix-shell "${PROJECT_BUILD_ROOT}/build.nix" -A "${1}"
+    else
+        error "You are already in a nix-shell!"
+    fi
 }
 
 note "Helpers successfully loaded."

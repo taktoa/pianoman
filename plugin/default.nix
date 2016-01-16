@@ -53,7 +53,7 @@ clangStdenv.mkDerivation rec {
       rm "$BUILD_LOG"
       cmakeFlags="$OLD_CMAKE_FLAGS"
       unset OLD_CMAKE_FLAGS BUILD_LOG
-      refresh-build "${toString src}"
+      refresh-plugin-build "${toString src}"
       note "Entering nix-shell"
   '';
 }
