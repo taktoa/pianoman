@@ -26,7 +26,8 @@ clangStdenv.mkDerivation rec {
       [[ -d "$(pwd)/build" ]] && rm -rf build
       source ${../helpers}
       OLD_CMAKE_FLAGS="$cmakeFlags"
-      cmakeFlags="-DCMAKE_CXX_FLAGS=-v $cmakeFlags" cmakeConfigurePhase
+      cmakeFlags="-DCMAKE_C_FLAGS=-v -DCMAKE_CXX_FLAGS=-v $cmakeFlags" \
+          cmakeConfigurePhase
       BUILD_LOG="$(mktemp -p /tmp build-log.XXXXXX)"
       ninja &> "$BUILD_LOG"
       echo ""
