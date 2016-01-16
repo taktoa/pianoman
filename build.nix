@@ -5,4 +5,5 @@ let cp = pkgs.callPackage;
 in (rec {
   headlessTeamspeak = cp ./headless-teamspeak {};
   pianoman          = cp ./pianoman { inherit headlessTeamspeak; };
-}).pianoman
+  plugin            = cp ./plugin {};
+})
