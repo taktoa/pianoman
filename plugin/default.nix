@@ -18,7 +18,6 @@ clangStdenv.mkDerivation rec {
   cmakeFlags = "-GNinja";
 
   preConfigure = ''
-      mkdir include
       cp ${cppzmq}/include/zmq.hpp include/
   '';
   
