@@ -1,34 +1,19 @@
-/*
- * TeamSpeak 3 demo plugin
- *
- * Copyright (c) 2008-2015 TeamSpeak Systems GmbH
- */
-
-#ifdef _WIN32
-#pragma warning (disable : 4100)  /* Disable Unreferenced parameter warning */
-#include <Windows.h>
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "teamspeak/public_errors.h"
-#include "teamspeak/public_errors_rare.h"
-#include "teamspeak/public_definitions.h"
-#include "teamspeak/public_rare_definitions.h"
-#include "teamspeak/clientlib_publicdefinitions.h"
-#include "ts3_functions.h"
+#include <teamspeak/public_errors.h>
+#include <teamspeak/public_errors_rare.h>
+#include <teamspeak/public_definitions.h>
+#include <teamspeak/public_rare_definitions.h>
+#include <teamspeak/clientlib_publicdefinitions.h>
+#include <ts3_functions.h>
 #include "plugin.h"
 
 static struct TS3Functions ts3Functions;
 
-#ifdef _WIN32
-#define _strcpy(dest, destSize, src) strcpy_s(dest, destSize, src)
-#define snprintf sprintf_s
-#else
-#define _strcpy(dest, destSize, src) { strncpy(dest, src, destSize-1); (dest)[destSize-1] = '\0'; }
-#endif
+#define _strcpy(dest, destSize, src) \
+    { strncpy(dest, src, destSize-1); (dest)[destSize-1] = '\0'; }
 
 #define PLUGIN_API_VERSION 20
 
@@ -41,19 +26,6 @@ static struct TS3Functions ts3Functions;
 
 static char* pluginID = NULL;
 
-#ifdef _WIN32
-/* Helper function to convert wchar_T to Utf-8 encoded strings on Windows */
-static int wcharToUtf8(const wchar_t* str, char** result) {
-	int outlen = WideCharToMultiByte(CP_UTF8, 0, str, -1, 0, 0, 0, 0);
-	*result = (char*)malloc(outlen);
-	if(WideCharToMultiByte(CP_UTF8, 0, str, -1, *result, outlen, 0, 0) == 0) {
-		*result = NULL;
-		return -1;
-	}
-	return 0;
-}
-#endif
-
 /*********************************** Required functions ************************************/
 /*
  * If any of these required functions is not implemented, TS3 will refuse to load the plugin
@@ -61,19 +33,7 @@ static int wcharToUtf8(const wchar_t* str, char** result) {
 
 /* Unique name identifying this plugin */
 const char* ts3plugin_name() {
-#ifdef _WIN32
-	/* TeamSpeak expects UTF-8 encoded characters. Following demonstrates a possibility how to convert UTF-16 wchar_t into UTF-8. */
-	static char* result = NULL;  /* Static variable so it's allocated only once */
-	if(!result) {
-		const wchar_t* name = L"Test Plugin";
-		if(wcharToUtf8(name, &result) == -1) {  /* Convert name into UTF-8 encoded result */
-			result = "Test Plugin";  /* Conversion failed, fallback here */
-		}
-	}
-	return result;
-#else
 	return "Test Plugin";
-#endif
 }
 
 /* Plugin version */
@@ -194,18 +154,11 @@ int ts3plugin_processCommand(uint64 serverConnectionHandlerID, const char* comma
 	char *s, *param1 = NULL, *param2 = NULL;
 	int i = 0;
 	enum { CMD_NONE = 0, CMD_JOIN, CMD_COMMAND, CMD_SERVERINFO, CMD_CHANNELINFO, CMD_AVATAR, CMD_ENABLEMENU, CMD_SUBSCRIBE, CMD_UNSUBSCRIBE, CMD_SUBSCRIBEALL, CMD_UNSUBSCRIBEALL } cmd = CMD_NONE;
-#ifdef _WIN32
-	char* context = NULL;
-#endif
 
 	printf("PLUGIN: process command: '%s'\n", command);
 
 	_strcpy(buf, COMMAND_BUFSIZE, command);
-#ifdef _WIN32
-	s = strtok_s(buf, " ", &context);
-#else
 	s = strtok(buf, " ");
-#endif
 	while(s != NULL) {
 		if(i == 0) {
 			if(!strcmp(s, "join")) {
@@ -234,11 +187,7 @@ int ts3plugin_processCommand(uint64 serverConnectionHandlerID, const char* comma
 		} else {
 			param2 = s;
 		}
-#ifdef _WIN32
-		s = strtok_s(NULL, " ", &context);
-#else
 		s = strtok(NULL, " ");
-#endif
 		i++;
 	}
 
@@ -1050,7 +999,7 @@ void ts3plugin_onAvatarUpdated(uint64 serverConnectionHandlerID, anyID clientID,
 
 /*
  * Called when a plugin menu item (see ts3plugin_initMenus) is triggered. Optional function, when not using plugin menus, do not implement this.
- * 
+ *
  * Parameters:
  * - serverConnectionHandlerID: ID of the current server tab
  * - type: Type of the menu (PLUGIN_MENU_TYPE_CHANNEL, PLUGIN_MENU_TYPE_CLIENT or PLUGIN_MENU_TYPE_GLOBAL)
