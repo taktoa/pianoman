@@ -6,7 +6,7 @@
 let ts3Version = (builtins.parseDrvName teamspeak_client.name).version;
     rename = stdenv.lib.setName "teamspeak-headless-client-${ts3Version}";
     inputs = { inherit libpulseaudio;
-               qt55          = { qtbase = headlessTeamspeakQt5; };
+               qtbase        = headlessTeamspeakQt5;
                freetype      = headlessTeamspeakQt5;
                # We don't want to provide any of the X libraries,
                # but we need to give a path
