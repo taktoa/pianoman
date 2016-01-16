@@ -33,7 +33,7 @@ static char* pluginID = NULL;
 
 /* Unique name identifying this plugin */
 const char* ts3plugin_name() {
-	return "Test Plugin";
+	return "ZMQ Plugin";
 }
 
 /* Plugin version */

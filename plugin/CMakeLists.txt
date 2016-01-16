@@ -35,7 +35,7 @@ file(GLOB_RECURSE PLUGIN_C_HEADERS src/*.h)
 file(GLOB_RECURSE PLUGIN_CXX_SOURCES src/*.cpp)
 file(GLOB_RECURSE PLUGIN_CXX_HEADERS src/*.hpp)
 
-add_library(teamspeak-zeromq-plugin
+add_library(teamspeak-zeromq-plugin SHARED
   ${PLUGIN_C_SOURCES}
   ${PLUGIN_C_HEADERS}
   ${PLUGIN_CXX_SOURCES}
@@ -43,4 +43,4 @@ add_library(teamspeak-zeromq-plugin
 
 install(TARGETS teamspeak-zeromq-plugin
         RUNTIME DESTINATION bin
-        ARCHIVE DESTINATION lib)
+        LIBRARY DESTINATION lib/teamspeak/plugins)
