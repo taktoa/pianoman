@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 # -*- mode: sh; sh-shell: bash; coding: utf-8; -*-
 
 start-color () { echo -n -e "\e[${1}m"; }
