@@ -29,7 +29,7 @@ in lib.setName "headless-teamspeak-qt5-${version}" (qt55.qtbase.overrideDerivati
   #     -xcb -linuxfb -qpa xcb ... -no-eglfs -no-kms -no-wayland -no-opengl
   # I think -qpa xcb just sets the default QPA, but I am not sure.
   # We will obviously ultimately want to only build one platform.
-  
+
   configureFlags = ''
       -verbose
       -confirm-license

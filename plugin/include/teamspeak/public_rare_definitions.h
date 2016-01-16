@@ -141,11 +141,11 @@ enum VirtualServerPropertiesRare {
 	VIRTUALSERVER_FILEBASE,                                    //not available to clients, stores the folder used for file transfers
 	VIRTUALSERVER_DEFAULT_SERVER_GROUP,                        //the client permissions server group that a new client gets assigned
 	VIRTUALSERVER_DEFAULT_CHANNEL_GROUP,                       //the channel permissions group that a new client gets assigned when joining a channel
-	VIRTUALSERVER_FLAG_PASSWORD,                               //only available on request (=> requestServerVariables) 
+	VIRTUALSERVER_FLAG_PASSWORD,                               //only available on request (=> requestServerVariables)
 	VIRTUALSERVER_DEFAULT_CHANNEL_ADMIN_GROUP,                 //the channel permissions group that a client gets assigned when creating a channel
 	VIRTUALSERVER_MAX_DOWNLOAD_TOTAL_BANDWIDTH,                //only available on request (=> requestServerVariables)
 	VIRTUALSERVER_MAX_UPLOAD_TOTAL_BANDWIDTH,                  //only available on request (=> requestServerVariables)
-	VIRTUALSERVER_HOSTBANNER_URL,                              //available when connected, always up-to-date 
+	VIRTUALSERVER_HOSTBANNER_URL,                              //available when connected, always up-to-date
 	VIRTUALSERVER_HOSTBANNER_GFX_URL,                          //available when connected, always up-to-date
 	VIRTUALSERVER_HOSTBANNER_GFX_INTERVAL,                     //available when connected, always up-to-date
 	VIRTUALSERVER_COMPLAIN_AUTOBAN_COUNT,                      //only available on request (=> requestServerVariables)
@@ -159,9 +159,9 @@ enum VirtualServerPropertiesRare {
 	VIRTUALSERVER_ANTIFLOOD_POINTS_NEEDED_IP_BLOCK,            //only available on request (=> requestServerVariables)
 	VIRTUALSERVER_CLIENT_CONNECTIONS,                          //only available on request (=> requestServerVariables)
 	VIRTUALSERVER_QUERY_CLIENT_CONNECTIONS,                    //only available on request (=> requestServerVariables)
-	VIRTUALSERVER_HOSTBUTTON_TOOLTIP,                          //available when connected, always up-to-date 
-	VIRTUALSERVER_HOSTBUTTON_URL,                              //available when connected, always up-to-date 
-	VIRTUALSERVER_HOSTBUTTON_GFX_URL,                          //available when connected, always up-to-date 
+	VIRTUALSERVER_HOSTBUTTON_TOOLTIP,                          //available when connected, always up-to-date
+	VIRTUALSERVER_HOSTBUTTON_URL,                              //available when connected, always up-to-date
+	VIRTUALSERVER_HOSTBUTTON_GFX_URL,                          //available when connected, always up-to-date
 	VIRTUALSERVER_QUERYCLIENTS_ONLINE,                         //only available on request (=> requestServerVariables)
 	VIRTUALSERVER_DOWNLOAD_QUOTA,                              //only available on request (=> requestServerVariables)
 	VIRTUALSERVER_UPLOAD_QUOTA,                                //only available on request (=> requestServerVariables)

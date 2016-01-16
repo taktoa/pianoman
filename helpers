@@ -206,10 +206,10 @@ text-in-set () {
         echo ""
         echo "Check if TEXT is among the given SET_ELEMENTS."
     }
-    
+
     (( $# >= 3 ))       || { usage; return 1; }
     [[ "${2}" = "--" ]] || { usage; return 2; }
-    
+
     local INPUT="${1}"
     shift 2
 
@@ -227,14 +227,14 @@ ci-text-in-set () {
         echo "Check if TEXT is among the given SET_ELEMENTS,"
         echo "case-insensitively."
     }
-    
+
     (( $# >= 3 ))       || { usage; return 1; }
     [[ "${2}" = "--" ]] || { usage; return 2; }
-    
+
     local INPUT="${1}"
     shift 2
     REST="${*}"
-    
+
     LC_INPUT="$(echo "${INPUT}" | tr '[:upper:]' '[:lower:]')"
 
     eval "text-in-set '${INPUT}' -- ${REST}"

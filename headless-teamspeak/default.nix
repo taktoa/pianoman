@@ -10,13 +10,13 @@ let ts3Version = (builtins.parseDrvName teamspeak_client.name).version;
                freetype      = headlessTeamspeakQt5;
                # We don't want to provide any of the X libraries,
                # but we need to give a path
-               xorg          = { libSM       = headlessTeamspeakQt5; 
-                                 libICE      = headlessTeamspeakQt5; 
+               xorg          = { libSM       = headlessTeamspeakQt5;
+                                 libICE      = headlessTeamspeakQt5;
                                  libxcb      = headlessTeamspeakQt5;
-                                 libXrender  = headlessTeamspeakQt5; 
-                                 libXrandr   = headlessTeamspeakQt5; 
-                                 libXfixes   = headlessTeamspeakQt5; 
-                                 libXcursor  = headlessTeamspeakQt5; 
+                                 libXrender  = headlessTeamspeakQt5;
+                                 libXrandr   = headlessTeamspeakQt5;
+                                 libXfixes   = headlessTeamspeakQt5;
+                                 libXcursor  = headlessTeamspeakQt5;
                                  libXinerama = headlessTeamspeakQt5;
                                  libXext     = headlessTeamspeakQt5;
                                  libX11      = headlessTeamspeakQt5;

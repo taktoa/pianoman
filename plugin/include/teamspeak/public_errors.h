@@ -9,7 +9,7 @@ const unsigned int ERROR_undefined                              = 0x0001;
 const unsigned int ERROR_not_implemented                        = 0x0002;
 const unsigned int ERROR_ok_no_update                           = 0x0003;
 const unsigned int ERROR_dont_notify                            = 0x0004;
-const unsigned int ERROR_lib_time_limit_reached                 = 0x0005; 
+const unsigned int ERROR_lib_time_limit_reached                 = 0x0005;
 
 //dunno
 const unsigned int ERROR_command_not_found                      = 0x0100;

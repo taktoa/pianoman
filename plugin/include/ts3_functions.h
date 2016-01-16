@@ -120,7 +120,7 @@ struct TS3Functions {
 	unsigned int (*getClientVariableAsInt)(uint64 serverConnectionHandlerID, anyID clientID, size_t flag, int* result);
 	unsigned int (*getClientVariableAsUInt64)(uint64 serverConnectionHandlerID, anyID clientID, size_t flag, uint64* result);
 	unsigned int (*getClientVariableAsString)(uint64 serverConnectionHandlerID, anyID clientID, size_t flag, char** result);
-	unsigned int (*getClientList)(uint64 serverConnectionHandlerID, anyID** result); 
+	unsigned int (*getClientList)(uint64 serverConnectionHandlerID, anyID** result);
 	unsigned int (*getChannelOfClient)(uint64 serverConnectionHandlerID, anyID clientID, uint64* result);
 
 	/* Channel info */

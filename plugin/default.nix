@@ -20,11 +20,11 @@ clangStdenv.mkDerivation rec {
   preConfigure = ''
       cp ${cppzmq}/include/zmq.hpp include/
   '';
-  
+
   buildPhase = "ninja";
-  
+
   installPhase = "ninja install";
-  
+
   shellHook = ''
       cd ${toString src}
       [[ -d "$(pwd)/build" ]] && rm -rf build
