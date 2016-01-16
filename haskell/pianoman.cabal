@@ -1,0 +1,41 @@
+author:                   Remy Goldschmidt
+version:                  0.0.1
+build-type:               Simple
+cabal-version:            >= 1.10
+category:                 Utility
+copyright:                2016 Remy Goldschmidt <taktoa@gmail.com>
+extra-source-files:       README.md
+license-file:             LICENSE.md
+license:                  MIT
+maintainer:               taktoa@gmail.com
+name:                     pianoman
+synopsis:                 A TeamSpeak bot written in Haskell
+description:              A TeamSpeak bot written in Haskell
+                         
+library                  
+    build-depends:        base         == 4.*
+                        , containers   == 0.5.*
+                        , mtl          == 2.2.*
+                        , transformers == 0.4.*
+                        , text         == 1.2.*
+    default-language:     Haskell2010
+    exposed-modules:      Utility.PianoMan
+                        , Utility.PianoMan.Example
+    ghc-options:          -Wall
+                          -fno-warn-type-defaults
+                          -fno-warn-unused-imports
+                          -fno-warn-unused-do-bind
+    ghc-prof-options:     -auto-all -prof
+    hs-source-dirs:       library
+    default-extensions:   OverloadedStrings
+                        , BangPatterns
+                        , TupleSections
+
+executable pianoman
+    build-depends:        base == 4.*
+                        , pianoman
+    default-language:     Haskell2010
+    ghc-options:          -threaded
+    ghc-prof-options:     -auto-all -prof
+    hs-source-dirs:       executable
+    main-is:              Main.hs
