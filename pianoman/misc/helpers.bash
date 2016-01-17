@@ -60,7 +60,6 @@ set-pianoman-environment-variables () {
     export HOME="${TSDIR}"
     export PULSE_SERVER="unix:${TSDIR}/native"
     export PULSE_RUNTIME_PATH="${TSDIR}"
-    export QT_QPA_PLATFORM="offscreen"
     return 0
 }
 

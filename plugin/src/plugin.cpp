@@ -757,7 +757,7 @@ void ts3plugin_onServerStopEvent(uint64 serverConnectionHandlerID, const char* s
 
 int ts3plugin_onTextMessageEvent(uint64 serverConnectionHandlerID, anyID targetMode, anyID toID, anyID fromID, const char* fromName, const char* fromUniqueIdentifier, const char* message, int ffIgnored) {
     char buffer[512];
-    snprintf(buffer,512,"PLUGIN: onTextMessageEvent %llu %d %d %s %s %d\n", (long long unsigned int)serverConnectionHandlerID, targetMode, fromID, fromName, message, ffIgnored);
+    snprintf(buffer,512,"PLUGIN: onTextMessageEvent %llu %d %d %s %s %d", (long long unsigned int)serverConnectionHandlerID, targetMode, fromID, fromName, message, ffIgnored);
     rpc_server->send_event(rpc::simple_event(buffer));
 
 	/* Friend/Foe manager has ignored the message, so ignore here as well. */
@@ -792,9 +792,9 @@ void ts3plugin_onTalkStatusChangeEvent(uint64 serverConnectionHandlerID, int sta
 	if(ts3Functions.getClientDisplayName(serverConnectionHandlerID, clientID, name, 512) == ERROR_ok) {
                 char buffer[100];
 		if(status == STATUS_TALKING) {
-			snprintf(buffer,100,"--> %s starts talking\n", name);
+			snprintf(buffer,100,"--> %s starts talking", name);
 		} else {
-			snprintf(buffer,100,"--> %s stops talking\n", name);
+			snprintf(buffer,100,"--> %s stops talking", name);
 		}
                 rpc_server->send_event(rpc::simple_event(buffer));
 	}
@@ -860,7 +860,7 @@ int ts3plugin_onClientPokeEvent(uint64 serverConnectionHandlerID, anyID fromClie
     anyID myID;
     char buffer[512];
 
-    snprintf(buffer,512,"PLUGIN onClientPokeEvent: %llu %d %s %s %d\n", (long long unsigned int)serverConnectionHandlerID, fromClientID, pokerName, message, ffIgnored);
+    snprintf(buffer,512,"PLUGIN onClientPokeEvent: %llu %d %s %s %d", (long long unsigned int)serverConnectionHandlerID, fromClientID, pokerName, message, ffIgnored);
     rpc_server->send_event(rpc::simple_event(buffer));
 
 	/* Check if the Friend/Foe manager has already blocked this poke */
