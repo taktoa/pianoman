@@ -1,18 +1,22 @@
-columns: 80
 steps:
-  - unicode_syntax:      { add_language_pragma: false }
-  - imports:             { align: global }
-  - language_pragmas:    { remove_redundant: true, style: vertical }
-  - tabs:                { spaces: 4 }
-  - records:             {}
+  - imports:
+      align: global
+
+  - language_pragmas:
+      style: vertical
+      remove_redundant: true
+
+  - records:
+      align: group
+
+  - tabs:
+      spaces: 8
+
   - trailing_whitespace: {}
+
+columns: 80
+
 language_extensions:
-  - UnicodeSyntax
-  - NoImplicitPrelude
-  - UnicodeSyntax
-  - OverloadedStrings
-  - OverloadedLists
-  - BangPatterns
-  - TupleSections
-  - TypeSynonymInstances
-  - ScopedTypeVariables
+  - TemplateHaskell
+  - QuasiQuotes
+  - MultiParamTypeClasses

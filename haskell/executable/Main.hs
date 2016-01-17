@@ -1,6 +1,6 @@
 module Main (main) where
 
-import qualified Utility.Pianoman
+import qualified Utility.PianoMan
 
-main ∷ IO ()
-main = Utility.Pianoman.main
+main :: IO ()
+main = Utility.PianoMan.main
