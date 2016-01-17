@@ -8,7 +8,11 @@
 #include <teamspeak/public_rare_definitions.h>
 #include <teamspeak/clientlib_publicdefinitions.h>
 #include <ts3_functions.h>
+
+#include <boost/thread.hpp>
+
 #include "plugin.h"
+#include "rpc.hpp"
 
 static struct TS3Functions ts3Functions;
 
@@ -24,7 +28,10 @@ static struct TS3Functions ts3Functions;
 #define CHANNELINFO_BUFSIZE 512
 #define RETURNCODE_BUFSIZE 128
 
+void listServerConnections();
+
 static char* pluginID = NULL;
+static rpc::server_handle_t *rpc_server = NULL;
 
 /*********************************** Required functions ************************************/
 /*
@@ -84,11 +91,36 @@ int ts3plugin_init() {
 	ts3Functions.getPluginPath(pluginPath, PATH_BUFSIZE);
 
 	printf("PLUGIN: App path: %s\nResources path: %s\nConfig path: %s\nPlugin path: %s\n", appPath, resourcesPath, configPath, pluginPath);
+    rpc_server = new rpc::server_handle_t;
+    rpc_server->start_server();
+
+  listServerConnections();
 
     return 0;  /* 0 = success, 1 = failure, -2 = failure but client will not show a "failed to load" warning */
 	/* -2 is a very special case and should only be used if a plugin displays a dialog (e.g. overlay) asking the user to disable
 	 * the plugin again, avoiding the show another dialog by the client telling the user the plugin failed to load.
 	 * For normal case, if a plugin really failed to load because of an error, the correct return value is 1. */
+}
+
+void listServerConnections() {
+  uint64* ids;
+  char *s;
+  unsigned int error;
+  if(ts3Functions.getServerConnectionHandlerList(&ids) != ERROR_ok) {
+    ts3Functions.logMessage("Error getting server list", LogLevel_ERROR, "Plugin", 1);
+    return;
+  }
+  for(int i=0; ids[i]; i++) {
+    if((error = ts3Functions.getServerVariableAsString(ids[i], VIRTUALSERVER_NAME, &s)) != ERROR_ok) {
+      if(error != ERROR_not_connected) {  /* Don't spam error in this case (failed to connect) */
+        ts3Functions.logMessage("Error querying server name", LogLevel_ERROR, "Plugin", 1);
+      }
+      continue;
+    }
+    printf("- %llu - %s\n", (long long unsigned int)ids[i], s);
+    ts3Functions.freeMemory(s);
+  }
+  ts3Functions.freeMemory(ids);
 }
 
 /* Custom code called right before the plugin is unloaded */
@@ -101,6 +133,13 @@ void ts3plugin_shutdown() {
 	 * If your plugin implements a settings dialog, it must be closed and deleted here, else the
 	 * TeamSpeak client will most likely crash (DLL removed but dialog from DLL code still open).
 	 */
+    if (rpc_server) {
+        rpc_server->send_event(rpc::simple_event("shutdown"));
+        //sleep(1);
+        rpc_server->shutdown_server();
+        delete rpc_server;
+        rpc_server = NULL;
+    }
 
 	/* Free pluginID if we registered it */
 	if(pluginID) {
@@ -717,7 +756,9 @@ void ts3plugin_onServerStopEvent(uint64 serverConnectionHandlerID, const char* s
 }
 
 int ts3plugin_onTextMessageEvent(uint64 serverConnectionHandlerID, anyID targetMode, anyID toID, anyID fromID, const char* fromName, const char* fromUniqueIdentifier, const char* message, int ffIgnored) {
-    printf("PLUGIN: onTextMessageEvent %llu %d %d %s %s %d\n", (long long unsigned int)serverConnectionHandlerID, targetMode, fromID, fromName, message, ffIgnored);
+    char buffer[512];
+    snprintf(buffer,512,"PLUGIN: onTextMessageEvent %llu %d %d %s %s %d\n", (long long unsigned int)serverConnectionHandlerID, targetMode, fromID, fromName, message, ffIgnored);
+    rpc_server->send_event(rpc::simple_event(buffer));
 
 	/* Friend/Foe manager has ignored the message, so ignore here as well. */
 	if(ffIgnored) {
@@ -749,11 +790,13 @@ void ts3plugin_onTalkStatusChangeEvent(uint64 serverConnectionHandlerID, int sta
 	/* Demonstrate usage of getClientDisplayName */
 	char name[512];
 	if(ts3Functions.getClientDisplayName(serverConnectionHandlerID, clientID, name, 512) == ERROR_ok) {
+                char buffer[100];
 		if(status == STATUS_TALKING) {
-			printf("--> %s starts talking\n", name);
+			snprintf(buffer,100,"--> %s starts talking\n", name);
 		} else {
-			printf("--> %s stops talking\n", name);
+			snprintf(buffer,100,"--> %s stops talking\n", name);
 		}
+                rpc_server->send_event(rpc::simple_event(buffer));
 	}
 }
 
@@ -815,8 +858,10 @@ void ts3plugin_onClientBanFromServerEvent(uint64 serverConnectionHandlerID, anyI
 
 int ts3plugin_onClientPokeEvent(uint64 serverConnectionHandlerID, anyID fromClientID, const char* pokerName, const char* pokerUniqueIdentity, const char* message, int ffIgnored) {
     anyID myID;
+    char buffer[512];
 
-    printf("PLUGIN onClientPokeEvent: %llu %d %s %s %d\n", (long long unsigned int)serverConnectionHandlerID, fromClientID, pokerName, message, ffIgnored);
+    snprintf(buffer,512,"PLUGIN onClientPokeEvent: %llu %d %s %s %d\n", (long long unsigned int)serverConnectionHandlerID, fromClientID, pokerName, message, ffIgnored);
+    rpc_server->send_event(rpc::simple_event(buffer));
 
 	/* Check if the Friend/Foe manager has already blocked this poke */
 	if(ffIgnored) {
