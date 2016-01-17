@@ -48,13 +48,18 @@ toPipe :: Monad m => (a -> b) -> Pipe a b m ()
 toPipe f = forever (await >>= return . f >>= yield)
 
 unlinesBS :: [ByteString] -> ByteString
-unlinesBS = Foldable.fold . map (<> "\n")
+unlinesBS = Foldable.fold . map (<> "\t")
 
 unlinesBSPipe :: Monad m => Pipe [ByteString] ByteString m ()
 unlinesBSPipe = toPipe unlinesBS
 
+ipcPath :: Text
+ipcPath = "teamspeak.ipc"
+
+teamspeak :: (MonadSafe m, Base m ~ IO) => Producer [ByteString] m ()
+teamspeak = zmqProducer ("ipc://" <> ipcPath) [""]
+
 -- | FIXME: doc
 main :: IO ()
-main = runSafeT $ runEffect (producer >-> unlinesBSPipe >-> PB.stdout)
-  where
-    producer = zmqProducer "tcp://localhost:5555" ["10002"]
+main = runSafeT $ runEffect (teamspeak >-> unlinesBSPipe >-> PB.stdout)
+
