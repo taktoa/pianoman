@@ -56,6 +56,7 @@ namespace rpc {
         bool shutdown;
         zmq::context_t context;
         zmq::socket_t publisher;
+        zmq::socket_t request_server;
     public:
         //! FIXME: doc
         server_handle_t();
