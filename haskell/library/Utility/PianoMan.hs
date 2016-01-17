@@ -5,9 +5,12 @@
 -- | FIXME: doc
 module Utility.PianoMan (module Utility.PianoMan) where
 
-import           Pipes
+import           Pipes            ((>->))
+import qualified Pipes            as P
+import qualified Pipes.Prelude    as P
+
 import qualified Pipes.ByteString as PB
-import           Pipes.Safe
+import qualified Pipes.Safe       as PS
 
 import           Data.Text        (Text)
 import qualified Data.Text        as Text
@@ -36,30 +39,22 @@ type Subscription = ByteString
 zmqProducer :: (MonadSafe m, Base m ~ IO)
                => Address
                -> Seq Subscription
-               -> Producer [ByteString] m ()
-zmqProducer addr subs = liftIO Z.context >>= mkProducer
+               -> Producer ByteString m ()
+zmqProducer addr subs = (liftIO Z.context >>= producer) >-> P.concat
   where
-    mkProducer ctx = setupProducer ctx Z.Sub start
-    start s = do
-      mapM_ (Z.subscribe s) subs
-      Z.connect s $ Text.unpack addr
+    producer ctx = setupProducer ctx Z.Sub start
+    start s = mapM_ (Z.subscribe s) subs >> Z.connect s (Text.unpack addr)
 
-toPipe :: Monad m => (a -> b) -> Pipe a b m ()
-toPipe f = forever (await >>= return . f >>= yield)
+zmqAddress :: Text
+zmqAddress = "ipc://teamspeak.ipc"
 
-unlinesBS :: [ByteString] -> ByteString
-unlinesBS = Foldable.fold . map (<> "\t")
+stdoutLn :: MonadIO m => Consumer ByteString m ()
+stdoutLn = P.map (<> "\n") >-> PB.stdout
 
-unlinesBSPipe :: Monad m => Pipe [ByteString] ByteString m ()
-unlinesBSPipe = toPipe unlinesBS
-
-ipcPath :: Text
-ipcPath = "teamspeak.ipc"
-
-teamspeak :: (MonadSafe m, Base m ~ IO) => Producer [ByteString] m ()
-teamspeak = zmqProducer ("ipc://" <> ipcPath) [""]
+teamspeak :: (MonadSafe m, Base m ~ IO) => Producer ByteString m ()
+teamspeak = zmqProducer zmqAddress [""]
 
 -- | FIXME: doc
 main :: IO ()
-main = runSafeT $ runEffect (teamspeak >-> unlinesBSPipe >-> PB.stdout)
+main = runSafeT $ runEffect (teamspeak >-> stdoutLn)
 
