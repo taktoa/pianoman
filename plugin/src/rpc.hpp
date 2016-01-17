@@ -31,31 +31,42 @@
 //! FIXME: doc
 namespace rpc {
     //! FIXME: doc
-    typedef struct event_t {
+    class event_t {
     private:
     public:
         //! FIXME: doc
-        std::string serialize();
-    } event_t;
+        virtual std::vector<uint8_t> serialize() const;
+    };
+    class simple_event : public event_t {
+    public:
+        simple_event(std::string message);
+        virtual std::vector<uint8_t> serialize() const;
+    private:
+        std::vector<uint8_t> message;
+    };
 
     //! FIXME: doc
-    typedef class server_handle_t {
+    class server_handle_t {
     private:
         //! FIXME: doc
         boost::thread server_thread;
         // FIXME: Replace std::queue with something more thread-safe
         //! FIXME: doc
         std::queue<event_t> server_mailbox;
+        bool shutdown;
+        zmq::context_t context;
+        zmq::socket_t publisher;
     public:
         //! FIXME: doc
         server_handle_t();
         //! FIXME: doc
-        void send_event(event_t event);
-    } server_handle_t;
+        void send_event(const event_t &event);
+        void operator()();
+        //! FIXME: doc
+        void start_server();
+        //! FIXME: doc
+        void shutdown_server();
+    };
 
-    //! FIXME: doc
-    server_handle_t start_server();
 
-    //! FIXME: doc
-    void shutdown_server(server_handle_t handle);
 } /* namespace rpc */

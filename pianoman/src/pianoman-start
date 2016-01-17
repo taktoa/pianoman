@@ -80,6 +80,7 @@ done
 set-pianoman-environment-variables "${TS_HOME}"
 
 @pulseaudioBinary@ -n --use-pid-file=true -F @pulseConfig@ &
+export QT_QPA_PLATFORM="offscreen"
 PULSE_SINK="@pulseLoopbackSink@" \
 PULSE_SOURCE="@pulseInputSink@.monitor" \
           @headlessTeamspeakBinary@
