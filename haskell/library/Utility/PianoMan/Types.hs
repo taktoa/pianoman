@@ -14,6 +14,7 @@ import           Data.ByteString
 import           Data.Text
 
 type AnyID = Word16
+type Path = Text
 
 data Event = ConnectStatusChange { connectstatuschange_schandlerID :: Word64
                                  , connectstatuschange_newStatus   :: Int
@@ -145,5 +146,70 @@ data Event = ConnectStatusChange { connectstatuschange_schandlerID :: Word64
                                 , ulogmessage_logID             :: Word64
                                 , ulogmessage_logTime           :: Text
                                 , ulogmessage_completeLogString :: Text }
-
-
+           | ClientBanFromServer { clientbanfromserver_schanlder :: Word64,
+                                   clientbanfromserver_clientID :: AnyID,
+                                   clientbanfromserver_oldChannelID :: Word64,
+                                   clientbanfromserver_newChannelID :: Word64,
+                                   clientbanfromserver_visibility :: Int,
+                                   clientbanfromserver_kickerID :: AnyID,
+                                   clientbanfromserver_kickerName :: Text,
+                                   clientbanfromserver_kickeruident :: Text,
+                                   clientbanfromserver_time :: Word64,
+                                   clientbanfromserver_kickMessage :: Text }
+           | ClientPoke { clientpoke_schandler :: Word64,
+                          clientpoke_fromClientID :: AnyID,
+                          clientpoke_pokerName :: Text,
+                          clientpoke_pokeruident :: Text,
+                          clientpoke_message :: Text,
+                          clientpoke_ffIgnored :: Int }
+           | ClientSelfVariableUpdate { csvariableupdate_schandler :: Word64,
+                                        csvariableupdate_flag :: Int,
+                                        csvariableupdate_oldValue :: Text,
+                                        csvariableupdate_newValue :: Text, }
+           | FileList { filelist_schandler :: Word64,
+                        filelist_channelID :: Word64,
+                        filelist_path :: Path,
+                        filelist_name :: Text,
+                        filelist_size :: Word64,
+                        filelist_datetime :: Word64,
+                        filelist_type :: Int,
+                        filelist_incompletesize :: Word64,
+                        filelist_returnCode :: Text }
+           | FileListFinished { filelistfinished_schandler :: Word64,
+                                filelistfinished_channelID :: Word64,
+                                filelistfinished_path :: Path }
+           | FileInfo { fileinfo_schandler :: Word64,
+                        fileinfo_channelID :: Word64,
+                        fileinfo_name :: Text,
+                        fileinfo_size :: Word64,
+                        fileinfo_datetime:: Word64 }
+           | ServerGroupList { sglist_schandler :: Word64,
+                               sglist_sgID :: Word64,
+                               sglist_name :: Text,
+                               sglist_type :: Int,
+                               sglist_iconID :: Int,
+                               sglist_saveDB :: Int }
+           | ServerGroupListFinished { sglistfinished_schandler :: Word64 }
+           | ServerGroupByClientID { sgbyclient_schandler :: Word64,
+                                     sgbyclient_name :: Text,
+                                     sgbyclient_clientDBID :: Word64 }
+           | ServerGroupPermList { sgpermlist_schandler :: Word64,
+                                   sgpermlist_sgID :: Word64,
+                                   sgpermlist_permissionID :: Word64,
+                                   sgpermlist_permissionValue :: Int,
+                                   sgpermlist_permissionNegated :: Int,
+                                   sgpermlist_permissionSkip :: Int }
+           | ServerGroupPermListFinished { sgpermlistfinished_schandler :: Word64,
+                                           sgpermlistfinished_sgID :: Word64 }
+           | ServerGroupCLientList { sgclientlist_schandler :: Word64,
+                                     sgclientlist_sgID :: Word64,
+                                     sgclientlist_clientDBID :: Word64,
+                                     sgclientlist_clientNameIdent :: Text,
+                                     sgclientlist_clientuID :: Text }
+           | ChannelGroupList { cglist_schandler :: Word64,
+                                cglist_channelGroupID :: Word64,
+                                cglist_name :: Text,
+                                cglist_type :: Int,
+                                cglist_iconID :: Int,
+                                cglist_saveDB :: Int }
+           | ChannelGroupListFinished  { cglistfinished_schandler :: Word64 }
