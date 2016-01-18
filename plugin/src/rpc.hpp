@@ -7,7 +7,7 @@
 
 #include <boost/thread/thread.hpp>
 
-#include <msgpack.hpp>
+#include <json/json.h>
 #include <zmq.hpp>
 
 // //! FIXME: doc
@@ -61,7 +61,7 @@ namespace rpc {
         //! FIXME: doc
         server_handle_t();
         //! FIXME: doc
-        void send_event(const event_t &event);
+        void send_event(const Json::Value msg);
         void operator()();
         //! FIXME: doc
         void start_server();

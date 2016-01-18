@@ -35,9 +35,11 @@ namespace rpc {
         return message;
     }
 
-    void server_handle_t::send_event(const event_t &event) {
-        vector<uint8_t> binary = event.serialize();
-        cout << "sending '" << string(binary.begin(), binary.end()) << "'" << binary.size() << endl;
+    void server_handle_t::send_event(const Json::Value root) {
+        Json::FastWriter fw;
+        string text = fw.write(root);
+        vector<uint8_t> binary(text.begin(), text.end());
+        cout << "sending '" << text << "'" << endl;
         zmq::message_t message(binary.size());
         memcpy(message.data(),binary.data(),binary.size());
         publisher.send(message);
@@ -75,5 +77,6 @@ namespace rpc {
             //send_event(rpc::simple_event("tick")); // example, remove later
             if (shutdown) break;
         }
+        cout << "quiting thread" << endl;
     }
 }

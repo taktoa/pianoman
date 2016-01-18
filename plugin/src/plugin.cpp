@@ -11,6 +11,8 @@
 
 #include <boost/thread.hpp>
 
+#include <json/json.h>
+
 #include "plugin.h"
 #include "rpc.hpp"
 
@@ -134,7 +136,9 @@ void ts3plugin_shutdown() {
 	 * TeamSpeak client will most likely crash (DLL removed but dialog from DLL code still open).
 	 */
     if (rpc_server) {
-        rpc_server->send_event(rpc::simple_event("shutdown"));
+        Json::Value root;
+        root["event"] = "shutdown";
+        rpc_server->send_event(root);
         //sleep(1);
         rpc_server->shutdown_server();
         delete rpc_server;
@@ -791,12 +795,16 @@ void ts3plugin_onTalkStatusChangeEvent(uint64 serverConnectionHandlerID, int sta
 	char name[512];
 	if(ts3Functions.getClientDisplayName(serverConnectionHandlerID, clientID, name, 512) == ERROR_ok) {
                 char buffer[100];
+        Json::Value root;
+        root["name"] = name;
+        root["event"] = "onTalkStatusChangeEvent";
+        root["status"] = status;
 		if(status == STATUS_TALKING) {
 			snprintf(buffer,100,"--> %s starts talking", name);
 		} else {
 			snprintf(buffer,100,"--> %s stops talking", name);
 		}
-                rpc_server->send_event(rpc::simple_event(buffer));
+        rpc_server->send_event(root);
 	}
 }
 
@@ -861,7 +869,13 @@ int ts3plugin_onClientPokeEvent(uint64 serverConnectionHandlerID, anyID fromClie
     char buffer[512];
 
     snprintf(buffer,512,"PLUGIN onClientPokeEvent: %llu %d %s %s %d", (long long unsigned int)serverConnectionHandlerID, fromClientID, pokerName, message, ffIgnored);
-    rpc_server->send_event(rpc::simple_event(buffer));
+    Json::Value root;
+    root["event"] = "onClientPokeEvent";
+    root["serverConnectionHandlerID"] = (int)serverConnectionHandlerID;
+    root["fromClientID"] = fromClientID;
+    root["pokerName"] = pokerName;
+    root["message"] = message;
+    rpc_server->send_event(root);
 
 	/* Check if the Friend/Foe manager has already blocked this poke */
 	if(ffIgnored) {
