@@ -53,6 +53,7 @@ namespace rpc {
     }
 
     void server_handle_t::shutdown_server() {
+        shutdown = true;
         server_thread.interrupt();
         server_thread.join();
     }
@@ -62,7 +63,7 @@ namespace rpc {
         while (true) {
             try {
                 zmq::message_t msg;
-                request_server.recv(&msg);
+                request_server.recv(&msg); // TODO: causes thread to not quit on shutdown until it gets a msg
                 string x = string((const char *)msg.data(),msg.size());
                 if (x == "die") {
                     shutdown_teamspeak();
