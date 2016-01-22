@@ -8,6 +8,7 @@ find_package(Boost     REQUIRED program_options thread)
 
 pkg_check_modules(ZMQ REQUIRED libzmq)
 pkg_check_modules(MSG REQUIRED msgpack)
+pkg_check_modules(QT5 REQUIRED Qt5Gui)
 
 set(CMAKE_C_FLAGS
   "${CMAKE_C_FLAGS} -g -std=c11 -Werror")
@@ -15,6 +16,7 @@ set(CMAKE_CXX_FLAGS
   "${CMAKE_CXX_FLAGS} -g -std=c++14 -Werror")
 
 include_directories(
+  ${QT5_INCLUDE_DIRS}
   ${CMAKE_SOURCE_DIR}/include
   ${Boost_INCLUDE_DIRS}
   ${ZMQ_INCLUDE_DIRS}
@@ -26,6 +28,7 @@ link_directories(
   ${MSG_LIBRARY_DIRS})
 
 add_definitions(
+  ${QT5_CFLAGS_OTHER}
   ${Boost_CFLAGS_OTHER}
   ${ZMQ_CFLAGS_OTHER}
   ${MSG_CFLAGS_OTHER})
@@ -40,10 +43,10 @@ add_library(teamspeak-zeromq-plugin SHARED
   ${PLUGIN_C_HEADERS}
   ${PLUGIN_CXX_SOURCES}
   ${PLUGIN_CXX_HEADERS})
-target_link_libraries(teamspeak-zeromq-plugin ${Boost_LIBRARIES} ${ZMQ_LIBRARIES})
+target_link_libraries(teamspeak-zeromq-plugin ${Boost_LIBRARIES} ${ZMQ_LIBRARIES} jsoncpp)
 
 add_executable(simple_test ${PLUGIN_C_SOURCES} ${PLUGIN_CXX_SOURCES} src/simple_test.cpp)
-target_link_libraries(simple_test ${Boost_LIBRARIES} ${ZMQ_LIBRARIES})
+target_link_libraries(simple_test ${Boost_LIBRARIES} ${ZMQ_LIBRARIES} ${QT5_LIBRARIES} jsoncpp)
 
 install(TARGETS teamspeak-zeromq-plugin
         RUNTIME DESTINATION bin
