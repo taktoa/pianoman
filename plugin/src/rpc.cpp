@@ -67,6 +67,7 @@ namespace rpc {
                 string x = string((const char *)msg.data(),msg.size());
                 if (x == "die") {
                     shutdown_teamspeak();
+                    break;
                 }
                 cout << "got packet" << x << endl;
                 zmq::message_t reply(0);
