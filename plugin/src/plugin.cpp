@@ -694,9 +694,24 @@ void ts3plugin_onConnectStatusChangeEvent(uint64 serverConnectionHandlerID, int 
 }
 
 void ts3plugin_onNewChannelEvent(uint64 serverConnectionHandlerID, uint64 channelID, uint64 channelParentID) {
+    Json::Value root;
+    root["tag"] = "NewChannel";
+    root["_NewChannel_schandlerID"] = (int)serverConnectionHandlerID;
+    root["_NewChannel_channelParentID"] = (int)channelParentID;
+    root["_NewChannel_channelID"] = (int)channelID;
+    rpc_server->send_event(root);
 }
 
 void ts3plugin_onNewChannelCreatedEvent(uint64 serverConnectionHandlerID, uint64 channelID, uint64 channelParentID, anyID invokerID, const char* invokerName, const char* invokerUniqueIdentifier) {
+    Json::Value root;
+    root["tag"] = "NewChannelCreated";
+    root["_NewChannelCreated_schandlerID"] = (int)serverConnectionHandlerID;
+    root["_NewChannelCreated_channelID"] = (int)channelID;
+    root["_NewChannelCreated_cparentID"] = (int)channelParentID;
+    root["_NewChannelCreated_invokerID"] = invokerID;
+    root["_NewChannelCreated_invokerName"] = invokerName;
+    root["_NewChannelCreated_invokerUID"] = invokerUniqueIdentifier;
+    rpc_server->send_event(root);
 }
 
 void ts3plugin_onDelChannelEvent(uint64 serverConnectionHandlerID, uint64 channelID, anyID invokerID, const char* invokerName, const char* invokerUniqueIdentifier) {
@@ -762,7 +777,14 @@ void ts3plugin_onServerStopEvent(uint64 serverConnectionHandlerID, const char* s
 int ts3plugin_onTextMessageEvent(uint64 serverConnectionHandlerID, anyID targetMode, anyID toID, anyID fromID, const char* fromName, const char* fromUniqueIdentifier, const char* message, int ffIgnored) {
     char buffer[512];
     snprintf(buffer,512,"PLUGIN: onTextMessageEvent %llu %d %d %s %s %d", (long long unsigned int)serverConnectionHandlerID, targetMode, fromID, fromName, message, ffIgnored);
-    rpc_server->send_event(rpc::simple_event(buffer));
+    Json::Value root;
+    root["event"] = "TextMessage";
+    root["serverConnectionHandlerID"] = (int)serverConnectionHandlerID;
+    root["targetMode"] = targetMode;
+    root["fromID"] = fromID;
+    root["fromName"] = fromName;
+    root["message"] = message;
+    rpc_server->send_event(root);
 
 	/* Friend/Foe manager has ignored the message, so ignore here as well. */
 	if(ffIgnored) {
@@ -797,7 +819,7 @@ void ts3plugin_onTalkStatusChangeEvent(uint64 serverConnectionHandlerID, int sta
                 char buffer[100];
         Json::Value root;
         root["name"] = name;
-        root["event"] = "onTalkStatusChangeEvent";
+        root["event"] = "TalkStatusChange";
         root["status"] = status;
 		if(status == STATUS_TALKING) {
 			snprintf(buffer,100,"--> %s starts talking", name);
@@ -870,7 +892,7 @@ int ts3plugin_onClientPokeEvent(uint64 serverConnectionHandlerID, anyID fromClie
 
     snprintf(buffer,512,"PLUGIN onClientPokeEvent: %llu %d %s %s %d", (long long unsigned int)serverConnectionHandlerID, fromClientID, pokerName, message, ffIgnored);
     Json::Value root;
-    root["event"] = "onClientPokeEvent";
+    root["event"] = "ClientPoke";
     root["serverConnectionHandlerID"] = (int)serverConnectionHandlerID;
     root["fromClientID"] = fromClientID;
     root["pokerName"] = pokerName;
