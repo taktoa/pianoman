@@ -138,7 +138,7 @@ void ts3plugin_shutdown() {
     if (rpc_server) {
         Json::Value root;
         root["event"] = "shutdown";
-        rpc_server->send_event(root);
+        //~rpc_server->send_event(root);
         //sleep(1);
         rpc_server->shutdown_server();
         delete rpc_server;
@@ -699,7 +699,7 @@ void ts3plugin_onNewChannelEvent(uint64 serverConnectionHandlerID, uint64 channe
     root["_NewChannel_schandlerID"] = (int)serverConnectionHandlerID;
     root["_NewChannel_channelParentID"] = (int)channelParentID;
     root["_NewChannel_channelID"] = (int)channelID;
-    rpc_server->send_event(root);
+    //~rpc_server->send_event(root);
 }
 
 void ts3plugin_onNewChannelCreatedEvent(uint64 serverConnectionHandlerID, uint64 channelID, uint64 channelParentID, anyID invokerID, const char* invokerName, const char* invokerUniqueIdentifier) {
@@ -711,7 +711,7 @@ void ts3plugin_onNewChannelCreatedEvent(uint64 serverConnectionHandlerID, uint64
     root["_NewChannelCreated_invokerID"] = invokerID;
     root["_NewChannelCreated_invokerName"] = invokerName;
     root["_NewChannelCreated_invokerUID"] = invokerUniqueIdentifier;
-    rpc_server->send_event(root);
+    //~rpc_server->send_event(root);
 }
 
 void ts3plugin_onDelChannelEvent(uint64 serverConnectionHandlerID, uint64 channelID, anyID invokerID, const char* invokerName, const char* invokerUniqueIdentifier) {
@@ -774,42 +774,27 @@ int ts3plugin_onServerErrorEvent(uint64 serverConnectionHandlerID, const char* e
 void ts3plugin_onServerStopEvent(uint64 serverConnectionHandlerID, const char* shutdownMessage) {
 }
 
-int ts3plugin_onTextMessageEvent(uint64 serverConnectionHandlerID, anyID targetMode, anyID toID, anyID fromID, const char* fromName, const char* fromUniqueIdentifier, const char* message, int ffIgnored) {
-    char buffer[512];
-    snprintf(buffer,512,"PLUGIN: onTextMessageEvent %llu %d %d %s %s %d", (long long unsigned int)serverConnectionHandlerID, targetMode, fromID, fromName, message, ffIgnored);
+int ts3plugin_onTextMessageEvent(uint64      serverConnectionHandlerID,
+								 anyID		 targetMode,
+								 anyID		 toID,
+								 anyID		 fromID,
+								 const char* fromName,
+								 const char* fromUniqueIdentifier,
+								 const char* message,
+								 int		 ffIgnored) {
     Json::Value root;
-    root["event"] = "TextMessage";
-    root["serverConnectionHandlerID"] = (int)serverConnectionHandlerID;
-    root["targetMode"] = targetMode;
-    root["fromID"] = fromID;
-    root["fromName"] = fromName;
-    root["message"] = message;
+    root["tag"] = "TextMessage";
+    root["_TextMessage_schandlerID"] = (int) serverConnectionHandlerID;
+    root["_TextMessage_targetMode"]  = targetMode;
+    root["_TextMessage_toID"]        = toID;
+    root["_TextMessage_fromID"]      = fromID;
+    root["_TextMessage_fromName"]    = fromName;
+    root["_TextMessage_fromUID"]     = fromUniqueIdentifier;
+    root["_TextMessage_message"]     = message;
+    root["_TextMessage_ffIgnored"]   = ffIgnored;
     rpc_server->send_event(root);
-
-	/* Friend/Foe manager has ignored the message, so ignore here as well. */
-	if(ffIgnored) {
-		return 0; /* Client will ignore the message anyways, so return value here doesn't matter */
-	}
-
-#if 0
-	{
-		/* Example code: Autoreply to sender */
-		/* Disabled because quite annoying, but should give you some ideas what is possible here */
-		/* Careful, when two clients use this, they will get banned quickly... */
-		anyID myID;
-		if(ts3Functions.getClientID(serverConnectionHandlerID, &myID) != ERROR_ok) {
-			ts3Functions.logMessage("Error querying own client id", LogLevel_ERROR, "Plugin", serverConnectionHandlerID);
-			return 0;
-		}
-		if(fromID != myID) {  /* Don't reply when source is own client */
-			if(ts3Functions.requestSendPrivateTextMsg(serverConnectionHandlerID, "Text message back!", fromID, NULL) != ERROR_ok) {
-				ts3Functions.logMessage("Error requesting send text message", LogLevel_ERROR, "Plugin", serverConnectionHandlerID);
-			}
-		}
-	}
-#endif
-
-    return 0;  /* 0 = handle normally, 1 = client will ignore the text message */
+    /* 0 = handle normally, 1 = client will ignore the text message */
+    return 0;
 }
 
 void ts3plugin_onTalkStatusChangeEvent(uint64 serverConnectionHandlerID, int status, int isReceivedWhisper, anyID clientID) {
@@ -826,7 +811,7 @@ void ts3plugin_onTalkStatusChangeEvent(uint64 serverConnectionHandlerID, int sta
 		} else {
 			snprintf(buffer,100,"--> %s stops talking", name);
 		}
-        rpc_server->send_event(root);
+        //~rpc_server->send_event(root);
 	}
 }
 
@@ -897,7 +882,7 @@ int ts3plugin_onClientPokeEvent(uint64 serverConnectionHandlerID, anyID fromClie
     root["fromClientID"] = fromClientID;
     root["pokerName"] = pokerName;
     root["message"] = message;
-    rpc_server->send_event(root);
+    //~rpc_server->send_event(root);
 
 	/* Check if the Friend/Foe manager has already blocked this poke */
 	if(ffIgnored) {
