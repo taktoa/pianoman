@@ -72,6 +72,8 @@ library
                           -fno-warn-type-defaults
                           -fno-warn-unused-imports
                           -fno-warn-unused-do-bind
+                          -O0
+                          -j8
     ghc-prof-options:     -auto-all -prof
     hs-source-dirs:       library
     default-extensions:   OverloadedStrings
