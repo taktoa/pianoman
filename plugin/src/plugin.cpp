@@ -783,15 +783,15 @@ int ts3plugin_onTextMessageEvent(uint64      serverConnectionHandlerID,
 								 const char* message,
 								 int		 ffIgnored) {
     Json::Value root;
-    root["tag"] = "TextMessage";
-    root["_TextMessage_schandlerID"] = (int) serverConnectionHandlerID;
-    root["_TextMessage_targetMode"]  = targetMode;
-    root["_TextMessage_toID"]        = toID;
-    root["_TextMessage_fromID"]      = fromID;
-    root["_TextMessage_fromName"]    = fromName;
-    root["_TextMessage_fromUID"]     = fromUniqueIdentifier;
-    root["_TextMessage_message"]     = message;
-    root["_TextMessage_ffIgnored"]   = ffIgnored;
+    root["tag"]         = "TextMessage";
+    root["schandlerID"] = (int) serverConnectionHandlerID;
+	root["targetMode"]	= targetMode;
+	root["toID"]		= toID;
+	root["fromID"]		= fromID;
+	root["fromName"]	= fromName;
+	root["fromUID"]		= fromUniqueIdentifier;
+	root["message"]		= message;
+	root["ffIgnored"]	= ffIgnored;
     rpc_server->send_event(root);
     /* 0 = handle normally, 1 = client will ignore the text message */
     return 0;
