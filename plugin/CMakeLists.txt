@@ -48,6 +48,6 @@ target_link_libraries(teamspeak-zeromq-plugin ${Boost_LIBRARIES} ${ZMQ_LIBRARIES
 add_executable(simple_test ${PLUGIN_C_SOURCES} ${PLUGIN_CXX_SOURCES} src/simple_test.cpp)
 target_link_libraries(simple_test ${Boost_LIBRARIES} ${ZMQ_LIBRARIES} ${QT5_LIBRARIES} jsoncpp)
 
-install(TARGETS teamspeak-zeromq-plugin
+install(TARGETS teamspeak-zeromq-plugin simple_test
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib/teamspeak/plugins)
