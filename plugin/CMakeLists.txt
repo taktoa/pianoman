@@ -6,9 +6,10 @@ add_subdirectory(doc)
 find_package(PkgConfig REQUIRED)
 find_package(Boost     REQUIRED program_options thread)
 
-pkg_check_modules(ZMQ REQUIRED libzmq)
-pkg_check_modules(MSG REQUIRED msgpack)
-pkg_check_modules(QT5 REQUIRED Qt5Gui)
+pkg_check_modules(ZMQ     REQUIRED libzmq)
+pkg_check_modules(MSG     REQUIRED msgpack)
+pkg_check_modules(QT5     REQUIRED Qt5Gui)
+pkg_check_modules(JSONCPP REQUIRED jsoncpp)
 
 set(CMAKE_C_FLAGS
   "${CMAKE_C_FLAGS} -g -std=c11 -Werror")
@@ -46,27 +47,27 @@ add_library(teamspeak-zeromq-plugin SHARED
 target_link_libraries(teamspeak-zeromq-plugin
   ${Boost_LIBRARIES}
   ${ZMQ_LIBRARIES}
-  jsoncpp)
+  ${JSONCPP_LIBRARIES})
 
 add_executable(simple_test
+  src/simple_test.cpp
   ${PLUGIN_C_SOURCES}
-  ${PLUGIN_CXX_SOURCES}
-  src/simple_test.cpp)
+  ${PLUGIN_CXX_SOURCES})
 target_link_libraries(simple_test
   ${Boost_LIBRARIES}
   ${ZMQ_LIBRARIES}
   ${QT5_LIBRARIES}
-  jsoncpp)
+  ${JSONCPP_LIBRARIES})
 
 add_executable(integration_test
+  src/integration_test.cpp
   ${PLUGIN_C_SOURCES}
-  ${PLUGIN_CXX_SOURCES}
-  src/integration_test.cpp)
+  ${PLUGIN_CXX_SOURCES})
 target_link_libraries(integration_test
   ${Boost_LIBRARIES}
   ${ZMQ_LIBRARIES}
   ${QT5_LIBRARIES}
-  jsoncpp)
+  ${JSONCPP_LIBRARIES})
 
 install(TARGETS teamspeak-zeromq-plugin simple_test
         RUNTIME DESTINATION bin
