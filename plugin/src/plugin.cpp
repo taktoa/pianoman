@@ -16,6 +16,8 @@
 
 #include <json/json.h>
 
+#include <termcolor/termcolor.hpp>
+
 #include "plugin.h"
 #include "rpc.hpp"
 
@@ -45,9 +47,16 @@
 typedef char*                  mcstring_t;
 typedef const char*            ccstring_t;
 typedef enum PluginMenuType    menu_type_t;
-typedef struct PluginMenuItem* menu_item_t;
+typedef struct PluginMenuItem menu_item_t;
 typedef struct PluginHotkey    hotkey_t;
 typedef anyID                  ident_t;
+
+typedef enum loglevel {
+    Debug = 0,
+    Info,
+    Warning,
+    Error
+} loglevel_t;
 
 // -----------------------------------------------------------------------------
 // -- Global variables ---------------------------------------------------------
@@ -62,25 +71,37 @@ rpc::server_handle_t *rpc_server = NULL;
 // -----------------------------------------------------------------------------
 
 //! Helper function for logging.
-void pluginLog(std::string level, std::string message) {
+void pluginLog(loglevel_t level, std::string message) {
     std::string pluginLogPrefix = "ZeroMQ";
-    std::cerr << pluginLogPrefix << ":"
-              << " "
-              << "[" << level << "]"
-              << " " << message << std::endl;
+    std::cerr << pluginLogPrefix << ": [";
+    switch (level) {
+    case Debug:
+        std::cerr << "DEBUG"; 
+        break;
+    case Info:
+        std::cerr << termcolor::blue << "INFO";
+        break;
+    case Warning:
+        std::cerr << termcolor::yellow << "WARNING";
+        break;
+    case Error:
+        std::cerr << termcolor::red << "ERROR";
+        break;
+    }
+    std::cerr << termcolor::reset << "]" << " " << message << std::endl;
 }
 
 //! Call pluginLog with level DEBUG.
-void pluginLog_DEBUG(std::string message) { pluginLog("DEBUG", message); }
+void pluginLog_DEBUG(std::string message) { pluginLog(Debug, message); }
 
 //! Call pluginLog with level INFO.
-void pluginLog_INFO(std::string message) { pluginLog("INFO", message); }
+void pluginLog_INFO(std::string message) { pluginLog(Info, message); }
 
 //! Call pluginLog with level WARNING.
-void pluginLog_WARNING(std::string message) { pluginLog("WARNING", message); }
+void pluginLog_WARNING(std::string message) { pluginLog(Warning, message); }
 
 //! Call pluginLog with level ERROR.
-void pluginLog_ERROR(std::string message) { pluginLog("ERROR", message); }
+void pluginLog_ERROR(std::string message) { pluginLog(Error, message); }
 
 // -----------------------------------------------------------------------------
 // -- Required functions -------------------------------------------------------
@@ -253,11 +274,11 @@ void ts3plugin_freeMemory(void *data) { free(data); }
 int32_t ts3plugin_requestAutoload() { return 1; }
 
 //! Helper function to create a menu item
-static menu_item_t createMenuItem(menu_type_t type,
+static menu_item_t* createMenuItem(menu_type_t type,
                                   int32_t id,
                                   ccstring_t text,
                                   ccstring_t icon) {
-    auto menuItem = (menu_item_t) malloc(sizeof(menu_item_t));
+    auto menuItem = (menu_item_t*) malloc(sizeof(menu_item_t));
     menuItem->type = type;
     menuItem->id = id;
     _strcpy(menuItem->text, PLUGIN_MENU_BUFSZ, text);
@@ -270,7 +291,7 @@ static menu_item_t createMenuItem(menu_type_t type,
 #define BEGIN_CREATE_MENUS(x)                                       \
     const size_t sz = x + 1;                                        \
     size_t n = 0;                                                   \
-    *menuItems = (menu_item_t *) malloc(sizeof(menu_item_t) * sz);
+    *menuItems = (menu_item_t **) malloc(sizeof(menu_item_t) * sz);
 
 #define CREATE_MENU_ITEM(a, b, c, d)                \
     (*menuItems)[n++] = createMenuItem(a, b, c, d);
@@ -887,7 +908,8 @@ void ts3plugin_onEditMixedPlaybackVoiceDataEvent(uint64_t schandlerID,
     root["tag"]         = "EditMixedPlaybackVoiceData";
     root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
-    rpc_server->send_event(root);
+    // FIXME: must use req-rep, not publisher
+    //rpc_server->send_event(root);
 }
 
 //! FIXME: doc
@@ -900,7 +922,8 @@ void ts3plugin_onEditCapturedVoiceDataEvent(uint64_t schandlerID,
     root["tag"]         = "EditCapturedVoiceData";
     root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
-    rpc_server->send_event(root);
+    // FIXME: must use req-rep, not publisher
+    //rpc_server->send_event(root);
 }
 
 //! FIXME: doc

@@ -8,7 +8,7 @@
 #include <boost/thread/thread.hpp>
 
 #include <json/json.h>
-#include <zmq.hpp>
+#include <azmq/socket.hpp>
 
 // //! FIXME: doc
 // namespace msgpack {
@@ -54,9 +54,9 @@ namespace rpc {
         //! FIXME: doc
         std::queue<event_t> server_mailbox;
         bool shutdown;
-        zmq::context_t context;
-        zmq::socket_t publisher;
-        zmq::socket_t request_server;
+        boost::asio::io_service ios;
+        azmq::pub_socket publisher;
+        azmq::req_socket request_server;
     public:
         //! FIXME: doc
         server_handle_t();

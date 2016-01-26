@@ -35,7 +35,7 @@ add_definitions(
   ${MSG_CFLAGS_OTHER})
 
 set(GENERAL_LIBRARIES
-  ${Boost_LIBRARIES}
+  ${Boost_LIBRARIES} boost_regex
   ${ZMQ_LIBRARIES}
   ${QT5_LIBRARIES}
   ${JSONCPP_LIBRARIES})

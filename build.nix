@@ -4,6 +4,8 @@
 let
   callPackage = pkgs.newScope self;
   self = rec {
+    termcolor = callPackage ./misc/termcolor {};
+    azmq = callPackage ./misc/azmq {};
     jsoncpp = pkgs.jsoncpp.overrideDerivation (old: {
         cmakeFlags = [
             "-DBUILD_SHARED_LIBS=ON"
