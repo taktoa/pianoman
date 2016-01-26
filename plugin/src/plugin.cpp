@@ -389,95 +389,9 @@ void ts3plugin_initHotkeys(struct PluginHotkey*** hotkeys) {
 
 /* Clientlib */
 
-void ts3plugin_onConnectStatusChangeEvent(uint64 schandlerID, int newStatus, unsigned int errorNumber) {
-    /* Some example code following to show how to use the information query functions. */
-
-    if(newStatus == STATUS_CONNECTION_ESTABLISHED) {  /* connection established and we have client and channels available */
-        char* s;
-        char msg[1024];
-        anyID myID;
-        uint64* ids;
-        size_t i;
-        unsigned int error;
-
-        /* Print clientlib version */
-        if(ts3Functions.getClientLibVersion(&s) == ERROR_ok) {
-            printf("PLUGIN: Client lib version: %s\n", s);
-            ts3Functions.freeMemory(s);  /* Release string */
-        } else {
-            ts3Functions.logMessage("Error querying client lib version", LogLevel_ERROR, "Plugin", schandlerID);
-            return;
-        }
-
-        /* Write plugin name and version to log */
-        snprintf(msg, sizeof(msg), "Plugin %s, Version %s, Author: %s", ts3plugin_name(), ts3plugin_version(), ts3plugin_author());
-        ts3Functions.logMessage(msg, LogLevel_INFO, "Plugin", schandlerID);
-
-        /* Print virtual server name */
-        if((error = ts3Functions.getServerVariableAsString(schandlerID, VIRTUALSERVER_NAME, &s)) != ERROR_ok) {
-            if(error != ERROR_not_connected) {  /* Don't spam error in this case (failed to connect) */
-                ts3Functions.logMessage("Error querying server name", LogLevel_ERROR, "Plugin", schandlerID);
-            }
-            return;
-        }
-        printf("PLUGIN: Server name: %s\n", s);
-        ts3Functions.freeMemory(s);
-
-        /* Print virtual server welcome message */
-        if(ts3Functions.getServerVariableAsString(schandlerID, VIRTUALSERVER_WELCOMEMESSAGE, &s) != ERROR_ok) {
-            ts3Functions.logMessage("Error querying server welcome message", LogLevel_ERROR, "Plugin", schandlerID);
-            return;
-        }
-        printf("PLUGIN: Server welcome message: %s\n", s);
-        ts3Functions.freeMemory(s);  /* Release string */
-
-        /* Print own client ID and nickname on this server */
-        if(ts3Functions.getClientID(schandlerID, &myID) != ERROR_ok) {
-            ts3Functions.logMessage("Error querying client ID", LogLevel_ERROR, "Plugin", schandlerID);
-            return;
-        }
-        if(ts3Functions.getClientSelfVariableAsString(schandlerID, CLIENT_NICKNAME, &s) != ERROR_ok) {
-            ts3Functions.logMessage("Error querying client nickname", LogLevel_ERROR, "Plugin", schandlerID);
-            return;
-        }
-        printf("PLUGIN: My client ID = %d, nickname = %s\n", myID, s);
-        ts3Functions.freeMemory(s);
-
-        /* Print list of all channels on this server */
-        if(ts3Functions.getChannelList(schandlerID, &ids) != ERROR_ok) {
-            ts3Functions.logMessage("Error getting channel list", LogLevel_ERROR, "Plugin", schandlerID);
-            return;
-        }
-        printf("PLUGIN: Available channels:\n");
-        for(i=0; ids[i]; i++) {
-            /* Query channel name */
-            if(ts3Functions.getChannelVariableAsString(schandlerID, ids[i], CHANNEL_NAME, &s) != ERROR_ok) {
-                ts3Functions.logMessage("Error querying channel name", LogLevel_ERROR, "Plugin", schandlerID);
-                return;
-            }
-            printf("PLUGIN: Channel ID = %llu, name = %s\n", (long long unsigned int)ids[i], s);
-            ts3Functions.freeMemory(s);
-        }
-        ts3Functions.freeMemory(ids);  /* Release array */
-
-        /* Print list of existing server connection handlers */
-        printf("PLUGIN: Existing server connection handlers:\n");
-        if(ts3Functions.getServerConnectionHandlerList(&ids) != ERROR_ok) {
-            ts3Functions.logMessage("Error getting server list", LogLevel_ERROR, "Plugin", schandlerID);
-            return;
-        }
-        for(i=0; ids[i]; i++) {
-            if((error = ts3Functions.getServerVariableAsString(ids[i], VIRTUALSERVER_NAME, &s)) != ERROR_ok) {
-                if(error != ERROR_not_connected) {  /* Don't spam error in this case (failed to connect) */
-                    ts3Functions.logMessage("Error querying server name", LogLevel_ERROR, "Plugin", schandlerID);
-                }
-                continue;
-            }
-            printf("- %llu - %s\n", (long long unsigned int)ids[i], s);
-            ts3Functions.freeMemory(s);
-        }
-        ts3Functions.freeMemory(ids);
-    }
+void ts3plugin_onConnectStatusChangeEvent(uint64 schandlerID,
+                                          int newStatus,
+                                          unsigned int errorNumber) {
 }
 
 void ts3plugin_onNewChannelEvent(uint64 schandlerID, uint64 channelID, uint64 channelParentID) {
@@ -489,7 +403,12 @@ void ts3plugin_onNewChannelEvent(uint64 schandlerID, uint64 channelID, uint64 ch
     rpc_server->send_event(root);
 }
 
-void ts3plugin_onNewChannelCreatedEvent(uint64 schandlerID, uint64 channelID, uint64 channelParentID, anyID invokerID, const char* invokerName, const char* invokerUniqueIdentifier) {
+void ts3plugin_onNewChannelCreatedEvent(uint64 schandlerID,
+                                        uint64 channelID,
+                                        uint64 channelParentID,
+                                        anyID invokerID,
+                                        const char* invokerName,
+                                        const char* invokerUID) {
     Json::Value root;
     root["tag"] = "NewChannelCreated";
     root["_NewChannelCreated_schandlerID"] = (int)schandlerID;
@@ -497,23 +416,23 @@ void ts3plugin_onNewChannelCreatedEvent(uint64 schandlerID, uint64 channelID, ui
     root["_NewChannelCreated_cparentID"] = (int)channelParentID;
     root["_NewChannelCreated_invokerID"] = invokerID;
     root["_NewChannelCreated_invokerName"] = invokerName;
-    root["_NewChannelCreated_invokerUID"] = invokerUniqueIdentifier;
+    root["_NewChannelCreated_invokerUID"] = invokerUID;
     rpc_server->send_event(root);
 }
 
-void ts3plugin_onDelChannelEvent(uint64 schandlerID, uint64 channelID, anyID invokerID, const char* invokerName, const char* invokerUniqueIdentifier) {
+void ts3plugin_onDelChannelEvent(uint64 schandlerID, uint64 channelID, anyID invokerID, const char* invokerName, const char* invokerUID) {
 }
 
-void ts3plugin_onChannelMoveEvent(uint64 schandlerID, uint64 channelID, uint64 newChannelParentID, anyID invokerID, const char* invokerName, const char* invokerUniqueIdentifier) {
+void ts3plugin_onChannelMoveEvent(uint64 schandlerID, uint64 channelID, uint64 newChannelParentID, anyID invokerID, const char* invokerName, const char* invokerUID) {
 }
 
 void ts3plugin_onUpdateChannelEvent(uint64 schandlerID, uint64 channelID) {
 }
 
-void ts3plugin_onUpdateChannelEditedEvent(uint64 schandlerID, uint64 channelID, anyID invokerID, const char* invokerName, const char* invokerUniqueIdentifier) {
+void ts3plugin_onUpdateChannelEditedEvent(uint64 schandlerID, uint64 channelID, anyID invokerID, const char* invokerName, const char* invokerUID) {
 }
 
-void ts3plugin_onUpdateClientEvent(uint64 schandlerID, anyID clientID, anyID invokerID, const char* invokerName, const char* invokerUniqueIdentifier) {
+void ts3plugin_onUpdateClientEvent(uint64 schandlerID, anyID clientID, anyID invokerID, const char* invokerName, const char* invokerUID) {
 }
 
 void ts3plugin_onClientMoveEvent(uint64 schandlerID, anyID clientID, uint64 oldChannelID, uint64 newChannelID, int visibility, const char* moveMessage) {
@@ -525,13 +444,13 @@ void ts3plugin_onClientMoveSubscriptionEvent(uint64 schandlerID, anyID clientID,
 void ts3plugin_onClientMoveTimeoutEvent(uint64 schandlerID, anyID clientID, uint64 oldChannelID, uint64 newChannelID, int visibility, const char* timeoutMessage) {
 }
 
-void ts3plugin_onClientMoveMovedEvent(uint64 schandlerID, anyID clientID, uint64 oldChannelID, uint64 newChannelID, int visibility, anyID moverID, const char* moverName, const char* moverUniqueIdentifier, const char* moveMessage) {
+void ts3plugin_onClientMoveMovedEvent(uint64 schandlerID, anyID clientID, uint64 oldChannelID, uint64 newChannelID, int visibility, anyID moverID, const char* moverName, const char* moverUID, const char* moveMessage) {
 }
 
-void ts3plugin_onClientKickFromChannelEvent(uint64 schandlerID, anyID clientID, uint64 oldChannelID, uint64 newChannelID, int visibility, anyID kickerID, const char* kickerName, const char* kickerUniqueIdentifier, const char* kickMessage) {
+void ts3plugin_onClientKickFromChannelEvent(uint64 schandlerID, anyID clientID, uint64 oldChannelID, uint64 newChannelID, int visibility, anyID kickerID, const char* kickerName, const char* kickerUID, const char* kickMessage) {
 }
 
-void ts3plugin_onClientKickFromServerEvent(uint64 schandlerID, anyID clientID, uint64 oldChannelID, uint64 newChannelID, int visibility, anyID kickerID, const char* kickerName, const char* kickerUniqueIdentifier, const char* kickMessage) {
+void ts3plugin_onClientKickFromServerEvent(uint64 schandlerID, anyID clientID, uint64 oldChannelID, uint64 newChannelID, int visibility, anyID kickerID, const char* kickerName, const char* kickerUID, const char* kickMessage) {
 }
 
 void ts3plugin_onClientIDsEvent(uint64 schandlerID, const char* clientUID, anyID clientID, const char* clientName) {
@@ -540,7 +459,7 @@ void ts3plugin_onClientIDsEvent(uint64 schandlerID, const char* clientUID, anyID
 void ts3plugin_onClientIDsFinishedEvent(uint64 schandlerID) {
 }
 
-void ts3plugin_onServerEditedEvent(uint64 schandlerID, anyID editerID, const char* editerName, const char* editerUniqueIdentifier) {
+void ts3plugin_onServerEditedEvent(uint64 schandlerID, anyID editorID, const char* editorName, const char* editorUID) {
 }
 
 void ts3plugin_onServerUpdatedEvent(uint64 schandlerID) {
@@ -570,7 +489,7 @@ int ts3plugin_onTextMessageEvent(uint64      schandlerID,
                                  anyID       toID,
                                  anyID       fromID,
                                  const char* fromName,
-                                 const char* fromUniqueIdentifier,
+                                 const char* fromUID,
                                  const char* message,
                                  int         ffIgnored) {
     Json::Value root;
@@ -580,7 +499,7 @@ int ts3plugin_onTextMessageEvent(uint64      schandlerID,
     root["toID"]        = toID;
     root["fromID"]      = fromID;
     root["fromName"]    = fromName;
-    root["fromUID"]     = fromUniqueIdentifier;
+    root["fromUID"]     = fromUID;
     root["message"]     = message;
     root["ffIgnored"]   = ffIgnored;
     rpc_server->send_event(root);
@@ -658,10 +577,10 @@ void ts3plugin_onUserLoggingMessageEvent(const char* logMessage, int logLevel, c
 
 /* Clientlib rare */
 
-void ts3plugin_onClientBanFromServerEvent(uint64 schandlerID, anyID clientID, uint64 oldChannelID, uint64 newChannelID, int visibility, anyID kickerID, const char* kickerName, const char* kickerUniqueIdentifier, uint64 time, const char* kickMessage) {
+void ts3plugin_onClientBanFromServerEvent(uint64 schandlerID, anyID clientID, uint64 oldChannelID, uint64 newChannelID, int visibility, anyID kickerID, const char* kickerName, const char* kickerUID, uint64 time, const char* kickMessage) {
 }
 
-int ts3plugin_onClientPokeEvent(uint64 schandlerID, anyID fromClientID, const char* pokerName, const char* pokerUniqueIdentity, const char* message, int ffIgnored) {
+int ts3plugin_onClientPokeEvent(uint64 schandlerID, anyID fromClientID, const char* pokerName, const char* pokerUID, const char* message, int ffIgnored) {
     anyID myID;
     char buffer[512];
 
@@ -711,7 +630,7 @@ void ts3plugin_onServerGroupListEvent(uint64 schandlerID, uint64 serverGroupID, 
 void ts3plugin_onServerGroupListFinishedEvent(uint64 schandlerID) {
 }
 
-void ts3plugin_onServerGroupByClientIDEvent(uint64 schandlerID, const char* name, uint64 serverGroupList, uint64 clientDatabaseID) {
+void ts3plugin_onServerGroupByClientIDEvent(uint64 schandlerID, const char* name, uint64 serverGroupList, uint64 clientDBID) {
 }
 
 void ts3plugin_onServerGroupPermListEvent(uint64 schandlerID, uint64 serverGroupID, unsigned int permissionID, int permissionValue, int permissionNegated, int permissionSkip) {
@@ -720,7 +639,7 @@ void ts3plugin_onServerGroupPermListEvent(uint64 schandlerID, uint64 serverGroup
 void ts3plugin_onServerGroupPermListFinishedEvent(uint64 schandlerID, uint64 serverGroupID) {
 }
 
-void ts3plugin_onServerGroupClientListEvent(uint64 schandlerID, uint64 serverGroupID, uint64 clientDatabaseID, const char* clientNameIdentifier, const char* clientUniqueID) {
+void ts3plugin_onServerGroupClientListEvent(uint64 schandlerID, uint64 serverGroupID, uint64 clientDBID, const char* clientNameIdentifier, const char* clientUniqueID) {
 }
 
 void ts3plugin_onChannelGroupListEvent(uint64 schandlerID, uint64 channelGroupID, const char* name, int type, int iconID, int saveDB) {
@@ -741,19 +660,19 @@ void ts3plugin_onChannelPermListEvent(uint64 schandlerID, uint64 channelID, unsi
 void ts3plugin_onChannelPermListFinishedEvent(uint64 schandlerID, uint64 channelID) {
 }
 
-void ts3plugin_onClientPermListEvent(uint64 schandlerID, uint64 clientDatabaseID, unsigned int permissionID, int permissionValue, int permissionNegated, int permissionSkip) {
+void ts3plugin_onClientPermListEvent(uint64 schandlerID, uint64 clientDBID, unsigned int permissionID, int permissionValue, int permissionNegated, int permissionSkip) {
 }
 
-void ts3plugin_onClientPermListFinishedEvent(uint64 schandlerID, uint64 clientDatabaseID) {
+void ts3plugin_onClientPermListFinishedEvent(uint64 schandlerID, uint64 clientDBID) {
 }
 
-void ts3plugin_onChannelClientPermListEvent(uint64 schandlerID, uint64 channelID, uint64 clientDatabaseID, unsigned int permissionID, int permissionValue, int permissionNegated, int permissionSkip) {
+void ts3plugin_onChannelClientPermListEvent(uint64 schandlerID, uint64 channelID, uint64 clientDBID, unsigned int permissionID, int permissionValue, int permissionNegated, int permissionSkip) {
 }
 
-void ts3plugin_onChannelClientPermListFinishedEvent(uint64 schandlerID, uint64 channelID, uint64 clientDatabaseID) {
+void ts3plugin_onChannelClientPermListFinishedEvent(uint64 schandlerID, uint64 channelID, uint64 clientDBID) {
 }
 
-void ts3plugin_onClientChannelGroupChangedEvent(uint64 schandlerID, uint64 channelGroupID, uint64 channelID, anyID clientID, anyID invokerClientID, const char* invokerName, const char* invokerUniqueIdentity) {
+void ts3plugin_onClientChannelGroupChangedEvent(uint64 schandlerID, uint64 channelGroupID, uint64 channelID, anyID clientID, anyID invokerClientID, const char* invokerName, const char* invokerUID) {
 }
 
 int ts3plugin_onServerPermissionErrorEvent(uint64 schandlerID, const char* errorMessage, unsigned int error, const char* returnCode, unsigned int failedPermissionID) {
@@ -769,16 +688,16 @@ void ts3plugin_onPermissionListEvent(uint64 schandlerID, unsigned int permission
 void ts3plugin_onPermissionListFinishedEvent(uint64 schandlerID) {
 }
 
-void ts3plugin_onPermissionOverviewEvent(uint64 schandlerID, uint64 clientDatabaseID, uint64 channelID, int overviewType, uint64 overviewID1, uint64 overviewID2, unsigned int permissionID, int permissionValue, int permissionNegated, int permissionSkip) {
+void ts3plugin_onPermissionOverviewEvent(uint64 schandlerID, uint64 clientDBID, uint64 channelID, int overviewType, uint64 overviewID1, uint64 overviewID2, unsigned int permissionID, int permissionValue, int permissionNegated, int permissionSkip) {
 }
 
 void ts3plugin_onPermissionOverviewFinishedEvent(uint64 schandlerID) {
 }
 
-void ts3plugin_onServerGroupClientAddedEvent(uint64 schandlerID, anyID clientID, const char* clientName, const char* clientUniqueIdentity, uint64 serverGroupID, anyID invokerClientID, const char* invokerName, const char* invokerUniqueIdentity) {
+void ts3plugin_onServerGroupClientAddedEvent(uint64 schandlerID, anyID clientID, const char* clientName, const char* clientUID, uint64 serverGroupID, anyID invokerClientID, const char* invokerName, const char* invokerUID) {
 }
 
-void ts3plugin_onServerGroupClientDeletedEvent(uint64 schandlerID, anyID clientID, const char* clientName, const char* clientUniqueIdentity, uint64 serverGroupID, anyID invokerClientID, const char* invokerName, const char* invokerUniqueIdentity) {
+void ts3plugin_onServerGroupClientDeletedEvent(uint64 schandlerID, anyID clientID, const char* clientName, const char* clientUID, uint64 serverGroupID, anyID invokerClientID, const char* invokerName, const char* invokerUID) {
 }
 
 void ts3plugin_onClientNeededPermissionsEvent(uint64 schandlerID, unsigned int permissionID, int permissionValue) {
@@ -790,10 +709,10 @@ void ts3plugin_onClientNeededPermissionsFinishedEvent(uint64 schandlerID) {
 void ts3plugin_onFileTransferStatusEvent(anyID transferID, unsigned int status, const char* statusMessage, uint64 remotefileSize, uint64 schandlerID) {
 }
 
-void ts3plugin_onClientChatClosedEvent(uint64 schandlerID, anyID clientID, const char* clientUniqueIdentity) {
+void ts3plugin_onClientChatClosedEvent(uint64 schandlerID, anyID clientID, const char* clientUID) {
 }
 
-void ts3plugin_onClientChatComposingEvent(uint64 schandlerID, anyID clientID, const char* clientUniqueIdentity) {
+void ts3plugin_onClientChatComposingEvent(uint64 schandlerID, anyID clientID, const char* clientUID) {
 }
 
 void ts3plugin_onServerLogEvent(uint64 schandlerID, const char* logMsg) {
@@ -802,26 +721,36 @@ void ts3plugin_onServerLogEvent(uint64 schandlerID, const char* logMsg) {
 void ts3plugin_onServerLogFinishedEvent(uint64 schandlerID, uint64 lastPos, uint64 fileSize) {
 }
 
-void ts3plugin_onMessageListEvent(uint64 schandlerID, uint64 messageID, const char* fromClientUniqueIdentity, const char* subject, uint64 timestamp, int flagRead) {
+void ts3plugin_onMessageListEvent(uint64 schandlerID, uint64 messageID, const char* fromClientUID, const char* subject, uint64 timestamp, int flagRead) {
 }
 
-void ts3plugin_onMessageGetEvent(uint64 schandlerID, uint64 messageID, const char* fromClientUniqueIdentity, const char* subject, const char* message, uint64 timestamp) {
+void ts3plugin_onMessageGetEvent(uint64 schandlerID, uint64 messageID, const char* fromClientUID, const char* subject, const char* message, uint64 timestamp) {
 }
 
-void ts3plugin_onClientDBIDfromUIDEvent(uint64 schandlerID, const char* clientUID, uint64 clientDatabaseID) {
+void ts3plugin_onClientDBIDfromUIDEvent(uint64 schandlerID, const char* clientUID, uint64 clientDBID) {
 }
 
-void ts3plugin_onClientNamefromUIDEvent(uint64 schandlerID, const char* clientUID, uint64 clientDatabaseID, const char* clientNickName) {
+void ts3plugin_onClientNamefromUIDEvent(uint64 schandlerID, const char* clientUID, uint64 clientDBID, const char* clientNickName) {
 }
 
-void ts3plugin_onClientNamefromDBIDEvent(uint64 schandlerID, const char* clientUID, uint64 clientDatabaseID, const char* clientNickName) {
+void ts3plugin_onClientNamefromDBIDEvent(uint64 schandlerID, const char* clientUID, uint64 clientDBID, const char* clientNickName) {
 }
 
-void ts3plugin_onComplainListEvent(uint64 schandlerID, uint64 targetClientDatabaseID, const char* targetClientNickName, uint64 fromClientDatabaseID, const char* fromClientNickName, const char* complainReason, uint64 timestamp) {
+void ts3plugin_onComplainListEvent(uint64 schandlerID, uint64 targetClientDBID, const char* targetClientNickName, uint64 fromClientDBID, const char* fromClientNickName, const char* complainReason, uint64 timestamp) {
 }
 
-void ts3plugin_onBanListEvent(uint64 schandlerID, uint64 banid, const char* ip, const char* name, const char* uid, uint64 creationTime, uint64 durationTime, const char* invokerName,
-                              uint64 invokercldbid, const char* invokeruid, const char* reason, int numberOfEnforcements, const char* lastNickName) {
+void ts3plugin_onBanListEvent(uint64 schandlerID, uint64 banID,
+                              const char* ip,
+                              const char* name,
+                              const char* uid,
+                              uint64 creationTime,
+                              uint64 durationTime,
+                              const char* invokerName,
+                              uint64 invokercldbid,
+                              const char* invokeruid,
+                              const char* reason,
+                              int numberOfEnforcements,
+                              const char* lastNickName) {
 }
 
 void ts3plugin_onClientServerQueryLoginPasswordEvent(uint64 schandlerID, const char* loginPassword) {
