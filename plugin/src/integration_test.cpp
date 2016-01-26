@@ -2,19 +2,9 @@
 #include "rpc.hpp"
 #include "plugin.h"
 #include <stdint.h>
+#include <limits.h>
 
 using namespace std;
-
-int main(int argc, char **argv) {
-    cout << "starting" << endl;
-    rpc::server_handle_t *foo = new rpc::server_handle_t;
-    foo->start_server();
-    sleep(10);
-    cout << "stopping" << endl;
-    foo->shutdown_server();
-    delete foo;
-    return 0;
-}
 
 typedef anyID                ident_t;
 typedef const char*          string_t;
@@ -26,24 +16,24 @@ typedef enum PluginMenuType  menu_item_type_t;
 
 ident_t          gen_schandlerID()             { return 1; }
 ident_t          gen_channelID()               { return 1; }
-string_t         gen_modeID()                  { return "id:modeID"; }
+string_t         gen_modeID()                  { return "modeID"; }
 ident_t          gen_clientID()                { return 1; }
-string_t         gen_clientUID()               { return "id:clientUID"; }
-string_t         gen_clientName()              { return "id:clientName"; }
+string_t         gen_clientUID()               { return "clientUID"; }
+string_t         gen_clientName()              { return "clientName"; }
 uint64_t         gen_time()                    { return 1; }
 int32_t          gen_connectionStatus()        { return 1; }
 uint64_t         gen_connectionError()         { return 1; }
 int32_t          gen_visibility()              { return 1; }
 uint64_t         gen_serverError()             { return 1; }
-string_t         gen_permissionErrorMessage()  { return "msg:error"; }
-string_t         gen_serverErrorMessage()      { return "msg:error"; }
-string_t         gen_serverErrorExtraMessage() { return "msg:extra"; }
-string_t         gen_serverErrorReturnCode()   { return "misc:returnCode"; }
-string_t         gen_kickMessage()             { return "msg:kick"; }
-string_t         gen_moveMessage()             { return "msg:move"; }
-string_t         gen_shutdownMessage()         { return "msg:shutdown"; }
-string_t         gen_timeoutMessage()          { return "msg:timeout"; }
-string_t         gen_textMessage()             { return "msg:text"; }
+string_t         gen_permissionErrorMessage()  { return "permissionErrorMessage"; }
+string_t         gen_serverErrorMessage()      { return "serverErrorMessage"; }
+string_t         gen_serverErrorExtraMessage() { return "serverErrorExtraMessage"; }
+string_t         gen_serverErrorReturnCode()   { return "serverErrorReturnCode"; }
+string_t         gen_kickMessage()             { return "kickMessage"; }
+string_t         gen_moveMessage()             { return "moveMessage"; }
+string_t         gen_shutdownMessage()         { return "shutdownMessage"; }
+string_t         gen_timeoutMessage()          { return "timeoutMessage"; }
+string_t         gen_textMessage()             { return "textMessage"; }
 int32_t          gen_ffIgnored()               { return 1; }
 int32_t          gen_isReceivedWhisper()       { return 1; }
 int32_t          gen_playOrCap()               { return 1; }
@@ -58,25 +48,25 @@ float_t          gen_distance()                { return 1; }
 int32_t*         gen_voiceEdited()             { return new int32_t[1] { 5 }; }
 float_t*         gen_volume()                  { return new float[1] { 5 }; }
 uint64_t         gen_waveHandle()              { return 1; }
-string_t         gen_userLogMessage()          { return "msg:log"; }
-string_t         gen_userLogChannel()          { return "misc:logChannel"; }
+string_t         gen_userLogMessage()          { return "userLogMessage"; }
+string_t         gen_userLogChannel()          { return "userLogChannel"; }
 int64_t          gen_userLogLevel()            { return 1; }
 uint64_t         gen_userLogID()               { return 1; }
-string_t         gen_userLogTime()             { return "misc:logTime"; }
-string_t         gen_userLogString()           { return "misc:logString"; }
+string_t         gen_userLogTime()             { return "userLogTime"; }
+string_t         gen_userLogString()           { return "userLogString"; }
 uint64_t         gen_fileDate()                { return 1; }
-string_t         gen_fileName()                { return ""; }
-string_t         gen_filePath()                { return ""; }
+string_t         gen_fileName()                { return "fileName"; }
+string_t         gen_filePath()                { return "filePath"; }
 uint64_t         gen_fileProgress()            { return 1; }
 uint64_t         gen_fileSize()                { return 1; }
 int64_t          gen_fileType()                { return 1; }
-string_t         gen_pokeMessage()             { return ""; }
-string_t         gen_returnCode()              { return ""; }
+string_t         gen_pokeMessage()             { return "pokeMessage"; }
+string_t         gen_returnCode()              { return "returnCode"; }
 uint64_t         gen_serverGroupID()           { return 1; }
 int32_t          gen_variableFlag()            { return 1; }
-string_t         gen_variableNewValue()        { return ""; }
-string_t         gen_variableOldValue()        { return ""; }
-string_t         gen_channelGroupName()        { return ""; }
+string_t         gen_variableNewValue()        { return "variableNewValue"; }
+string_t         gen_variableOldValue()        { return "variableOldValue"; }
+string_t         gen_channelGroupName()        { return "channelGroupName"; }
 int32_t          gen_channelGroupType()        { return 1; }
 uint64_t         gen_clientDBID()              { return 1; }
 ident_t          gen_iconID()                  { return 1; }
@@ -86,44 +76,44 @@ int32_t          gen_permissionSkip()          { return 1; }
 int32_t          gen_permissionValue()         { return 1; }
 int32_t          gen_saveDB()                  { return 1; }
 uint64_t         gen_serverGroupList()         { return 1; }
-string_t         gen_serverGroupName()         { return ""; }
+string_t         gen_serverGroupName()         { return "serverGroupName"; }
 int32_t          gen_serverGroupType()         { return 1; }
 uint64_t         gen_channelGroupID()          { return 1; }
-string_t         gen_serverLogMessage()        { return ""; }
+string_t         gen_serverLogMessage()        { return "serverLogMessage"; }
 uint64_t         gen_serverLogLastPos()        { return 1; }
 uint32_t         gen_groupEndID()              { return 1; }
 uint64_t         gen_messageID()               { return 1; }
 uint64_t         gen_overviewID()              { return 1; }
 int32_t          gen_overviewType()            { return 1; }
-string_t         gen_permissionDescription()   { return ""; }
+string_t         gen_permissionDescription()   { return "permissionDescription"; }
 uint32_t         gen_permissionError()         { return 1; }
-string_t         gen_permissionName()          { return ""; }
-string_t         gen_permissionReturnCode()    { return ""; }
+string_t         gen_permissionName()          { return "permissionName"; }
+string_t         gen_permissionReturnCode()    { return "permissionReturnCode"; }
 uint64_t         gen_serverLogSize()           { return 1; }
 ident_t          gen_transferID()              { return 1; }
 uint64_t         gen_transferSize()            { return 1; }
 uint32_t         gen_transferStatus()          { return 1; }
-string_t         gen_transferStatusMessage()   { return ""; }
-string_t         gen_clientNickName()          { return ""; }
+string_t         gen_transferStatusMessage()   { return "transferStatusMessage"; }
+string_t         gen_clientNickName()          { return "clientNickName"; }
 int32_t          gen_flagRead()                { return 1; }
-string_t         gen_messageContents()         { return ""; }
-string_t         gen_messageSubject()          { return ""; }
+string_t         gen_messageContents()         { return "messageContents"; }
+string_t         gen_messageSubject()          { return "messageSubject"; }
 uint64_t         gen_timestamp()               { return 1; }
 uint64_t         gen_banID()                   { return 1; }
-string_t         gen_banReason()               { return ""; }
-string_t         gen_complainReason()          { return ""; }
-string_t         gen_ipAddress()               { return ""; }
+string_t         gen_banReason()               { return "banReason"; }
+string_t         gen_complainReason()          { return "complainReason"; }
+string_t         gen_ipAddress()               { return "ipAddress"; }
 int32_t          gen_numberOfEnforcements()    { return 1; }
-string_t         gen_password()                { return ""; }
-string_t         gen_pluginName()              { return ""; }
-string_t         gen_avatarPath()              { return ""; }
-string_t         gen_commandText()             { return ""; }
-string_t         gen_displayName()             { return ""; }
-string_t         gen_key()                     { return ""; }
-string_t         gen_keyword()                 { return ""; }
+string_t         gen_password()                { return "password"; }
+string_t         gen_pluginName()              { return "pluginName"; }
+string_t         gen_avatarPath()              { return "avatarPath"; }
+string_t         gen_commandText()             { return "commandText"; }
+string_t         gen_displayName()             { return "displayName"; }
+string_t         gen_key()                     { return "key"; }
+string_t         gen_keyword()                 { return "keyword"; }
 int32_t          gen_menuItemID()              { return 1; }
 menu_item_type_t gen_menuItemType()            { return (menu_item_type_t) 0; }
-string_t         gen_pluginCommand()           { return ""; }
+string_t         gen_pluginCommand()           { return "pluginCommand"; }
 uint64_t         gen_selectedItemID()          { return 1; }
 
 void integration_test() {
@@ -545,4 +535,51 @@ void integration_test() {
                                          gen_clientID(),
                                          gen_displayName(),
                                          gen_clientUID());
+}
+
+
+int main(int argc, char **argv) {
+    cout << "Executable: " << argv[0] << endl;
+    cout << "Arguments:" << endl;
+    for(int i = 1; i < argc; ++i) {
+        cout << "  " << i << ": " << argv[i] << endl;
+    }
+
+    cout << "Initializing plugin." << endl;
+    try {
+        ts3plugin_init();
+    } catch(const std::exception& e) {
+        cerr << "Error during plugin initialization: " << e.what() << endl;
+    } catch(...) {
+        cerr << "Error during plugin initialization: UNKNOWN" << endl;
+        return 1;
+    }
+
+    const int max_iterations = 100000;
+    cout << "Starting integration test." << endl;
+    cout << "Running " << max_iterations << " times." << endl;
+    try {
+        for(int i = 0; i < max_iterations; ++i) {
+            cout << "Iteration #" << i << endl;
+            integration_test();
+            usleep(100000); // sleep for 0.1 seconds
+        }
+    } catch(const std::exception& e) {
+        cerr << "Error during integration test: " << e.what() << endl;
+    } catch(...) {
+        cerr << "Error during integration test: UNKNOWN" << endl;
+    }
+
+    cout << "Shutting down plugin" << endl;
+    try {
+        ts3plugin_shutdown();
+    } catch(const std::exception& e) {
+        cerr << "Error during plugin shutdown: " << e.what() << endl;
+        return 3;
+    } catch(...) {
+        cerr << "Error during plugin shutdown: UNKNOWN" << endl;
+        return 3;
+    }
+
+    return 0;
 }
