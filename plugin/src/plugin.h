@@ -7,6 +7,12 @@
 #ifndef PLUGIN_H
 #define PLUGIN_H
 
+#include <teamspeak/public_definitions.h>
+#include <ts3_functions.h>
+#include "rpc.hpp"
+
+extern rpc::server_handle_t *rpc_server;
+
 #ifdef WIN32
 #define PLUGINS_EXPORTDLL __declspec(dllexport)
 #else

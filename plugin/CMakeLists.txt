@@ -68,6 +68,6 @@ target_link_libraries(integration_test
   ${QT5_LIBRARIES}
   jsoncpp)
 
-install(TARGETS teamspeak-zeromq-plugin
+install(TARGETS teamspeak-zeromq-plugin simple_test
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib/teamspeak/plugins)

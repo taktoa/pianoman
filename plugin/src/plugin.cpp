@@ -4,10 +4,8 @@
 #include <assert.h>
 #include <teamspeak/public_errors.h>
 #include <teamspeak/public_errors_rare.h>
-#include <teamspeak/public_definitions.h>
 #include <teamspeak/public_rare_definitions.h>
 #include <teamspeak/clientlib_publicdefinitions.h>
-#include <ts3_functions.h>
 
 #include <boost/thread.hpp>
 
@@ -33,7 +31,7 @@ static struct TS3Functions ts3Functions;
 void listServerConnections();
 
 static char* pluginID = NULL;
-static rpc::server_handle_t *rpc_server = NULL;
+rpc::server_handle_t *rpc_server = NULL;
 
 /*********************************** Required functions ************************************/
 /*
