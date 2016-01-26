@@ -46,6 +46,7 @@ typedef char*                  mcstring_t;
 typedef const char*            ccstring_t;
 typedef enum PluginMenuType    menu_type_t;
 typedef struct PluginMenuItem* menu_item_t;
+typedef struct PluginHotkey    hotkey_t;
 typedef anyID                  ident_t;
 
 // -----------------------------------------------------------------------------
@@ -294,148 +295,164 @@ enum {
     MENU_ID_GLOBAL_2
 };
 
-/*
- * Initialize plugin menus.
- * This function is called after ts3plugin_init and ts3plugin_registerPluginID.
- * A pluginID is required for plugin menus to work.
- * Both ts3plugin_registerPluginID and ts3plugin_freeMemory must be implemented
- * to use menus.
- * If plugin menus are not used by a plugin, do not implement this function or
- * return NULL.
- */
+//! Initialize plugin menus.
+//! This function is called after ts3plugin_init and ts3plugin_registerPluginID.
+//! A pluginID is required for plugin menus to work.
+//! Both ts3plugin_registerPluginID and ts3plugin_freeMemory must be implemented
+//! to use menus.
+//! If plugin menus are not used by a plugin, do not implement this function or
+//! return NULL.
 void ts3plugin_initMenus(struct PluginMenuItem ***menuItems, char **menuIcon) {
-    /*
-     * Create the menus
-     * There are three types of menu items:
-     * - PLUGIN_MENU_TYPE_CLIENT:  Client context menu
-     * - PLUGIN_MENU_TYPE_CHANNEL: Channel context menu
-     * - PLUGIN_MENU_TYPE_GLOBAL:  "Plugins" menu in menu bar of main window
-     *
-     * Menu IDs are used to identify the menu item when
-     * ts3plugin_onMenuItemEvent is called
-     *
-     * The menu text is required, max length is 128 characters
-     *
-     * The icon is optional, max length is 128 characters. When not using icons,
-     * just pass an empty string.
-     * Icons are loaded from a subdirectory in the TeamSpeak client plugins
-     * folder. The subdirectory must be named like the
-     * plugin filename, without dll/so/dylib suffix
-     * e.g. for "test_plugin.dll", icon "1.png" is loaded from <TeamSpeak 3
-     * Client install dir>\plugins\test_plugin\1.png
-     */
+    // FIXME: cleanup
 
-    BEGIN_CREATE_MENUS(
-        7); /* IMPORTANT: Number of menu items must be correct! */
-    CREATE_MENU_ITEM(
-        PLUGIN_MENU_TYPE_CLIENT, MENU_ID_CLIENT_1, "Client item 1", "1.png");
-    CREATE_MENU_ITEM(
-        PLUGIN_MENU_TYPE_CLIENT, MENU_ID_CLIENT_2, "Client item 2", "2.png");
-    CREATE_MENU_ITEM(
-        PLUGIN_MENU_TYPE_CHANNEL, MENU_ID_CHANNEL_1, "Channel item 1", "1.png");
-    CREATE_MENU_ITEM(
-        PLUGIN_MENU_TYPE_CHANNEL, MENU_ID_CHANNEL_2, "Channel item 2", "2.png");
-    CREATE_MENU_ITEM(
-        PLUGIN_MENU_TYPE_CHANNEL, MENU_ID_CHANNEL_3, "Channel item 3", "3.png");
-    CREATE_MENU_ITEM(
-        PLUGIN_MENU_TYPE_GLOBAL, MENU_ID_GLOBAL_1, "Global item 1", "1.png");
-    CREATE_MENU_ITEM(
-        PLUGIN_MENU_TYPE_GLOBAL, MENU_ID_GLOBAL_2, "Global item 2", "2.png");
-    END_CREATE_MENUS; /* Includes an assert checking if the number of menu items
-                         matched */
+    // Create the menus
+    // There are three types of menu items:
+    // - PLUGIN_MENU_TYPE_CLIENT:  Client context menu
+    // - PLUGIN_MENU_TYPE_CHANNEL: Channel context menu
+    // - PLUGIN_MENU_TYPE_GLOBAL:  "Plugins" menu in menu bar of main window
+    //
+    // Menu IDs are used to identify the menu item when
+    // ts3plugin_onMenuItemEvent is called
+    //
+    // The menu text is required, max length is 128 characters
+    //
+    // The icon is optional, max length is 128 characters.
+    // When not using icons, just pass an empty string.
+    //
+    // Icons are loaded from a subdirectory in the client plugins folder.
+    //
+    // The subdirectory must be named like the plugin filename, without the
+    // library suffix (e.g.: dll/so/dylib).
+    //
+    // For example, for "test_plugin.dll", icon "1.png" is loaded from:
+    //   <client install dir>/plugins/test_plugin/1.png
 
-    /*
-     * Specify an optional icon for the plugin. This icon is used for the
-     * plugins submenu within context and main menus
-     * If unused, set menuIcon to NULL
-     */
+    // IMPORTANT: Number of menu items must be correct!
+    BEGIN_CREATE_MENUS(7);
+
+    CREATE_MENU_ITEM(PLUGIN_MENU_TYPE_CLIENT,
+                     MENU_ID_CLIENT_1,
+                     "Client item 1",
+                     "1.png");
+    CREATE_MENU_ITEM(PLUGIN_MENU_TYPE_CLIENT,
+                     MENU_ID_CLIENT_2,
+                     "Client item 2",
+                     "2.png");
+    CREATE_MENU_ITEM(PLUGIN_MENU_TYPE_CHANNEL,
+                     MENU_ID_CHANNEL_1,
+                     "Channel item 1",
+                     "1.png");
+    CREATE_MENU_ITEM(PLUGIN_MENU_TYPE_CHANNEL,
+                     MENU_ID_CHANNEL_2,
+                     "Channel item 2",
+                     "2.png");
+    CREATE_MENU_ITEM(PLUGIN_MENU_TYPE_CHANNEL,
+                     MENU_ID_CHANNEL_3,
+                     "Channel item 3",
+                     "3.png");
+    CREATE_MENU_ITEM(PLUGIN_MENU_TYPE_GLOBAL,
+                     MENU_ID_GLOBAL_1,
+                     "Global item 1",
+                     "1.png");
+    CREATE_MENU_ITEM(PLUGIN_MENU_TYPE_GLOBAL,
+                     MENU_ID_GLOBAL_2,
+                     "Global item 2",
+                     "2.png");
+
+    // END_CREATE_MENUS includes an assert checking the number of menu items
+    END_CREATE_MENUS;
+
+    // Specify an optional icon for the plugin. This icon is used for the
+    // plugins submenu within context and main menus.
+    // If unused, set menuIcon to NULL.
     *menuIcon = (char *) malloc(PLUGIN_MENU_BUFSZ * sizeof(char));
     _strcpy(*menuIcon, PLUGIN_MENU_BUFSZ, "t.png");
 
-    /*
-     * Menus can be enabled or disabled with:
-     * ts3Functions.setPluginMenuEnabled(pluginID, menuID, 0|1);
-     * Test it with plugin command: /test enablemenu <menuID> <0|1>
-     * Menus are enabled by default. Please note that shown menus will not
-     * automatically enable or disable when calling this function to
-     * ensure Qt menus are not modified by any thread other the UI thread. The
-     * enabled or disable state will change the next time a
-     * menu is displayed.
-     */
-    /* For example, this would disable MENU_ID_GLOBAL_2: */
-    /* ts3Functions.setPluginMenuEnabled(pluginID, MENU_ID_GLOBAL_2, 0); */
+    // Menus can be enabled or disabled with:
+    // ts3Functions.setPluginMenuEnabled(pluginID, menuID, 0|1);
+    // Test it with plugin command: /zeromq enablemenu <menuID> <0|1>
+    // Menus are enabled by default. Please note that shown menus will not
+    // automatically enable or disable when calling this function to
+    // ensure Qt menus are not modified by any thread other the UI thread. The
+    // enabled or disable state will change the next time a
+    // menu is displayed.
 
-    /* All memory allocated in this function will be automatically released by
-     * the TeamSpeak client later by calling ts3plugin_freeMemory */
+    // For example, this would disable MENU_ID_GLOBAL_2:
+    // ts3Functions.setPluginMenuEnabled(pluginID, MENU_ID_GLOBAL_2, 0);
+
+    // All memory allocated in this function will be automatically released by
+    // the TeamSpeak client later by calling ts3plugin_freeMemory.
 }
 
-/* Helper function to create a hotkey */
-static struct PluginHotkey *createHotkey(ccstring_t keyword,
-                                         ccstring_t description) {
-    struct PluginHotkey *hotkey =
-        (struct PluginHotkey *) malloc(sizeof(struct PluginHotkey));
+// Helper function to create a hotkey
+static hotkey_t* createHotkey(ccstring_t keyword, ccstring_t description) {
+    // FIXME: cleanup
+    hotkey_t* hotkey = (hotkey_t*) malloc(sizeof(hotkey_t));
     _strcpy(hotkey->keyword, PLUGIN_HOTKEY_BUFSZ, keyword);
     _strcpy(hotkey->description, PLUGIN_HOTKEY_BUFSZ, description);
     return hotkey;
 }
 
-/* Some makros to make the code to create hotkeys a bit more readable */
-#define BEGIN_CREATE_HOTKEYS(x)                                         \
-    const size_t sz = x + 1;                                            \
-    size_t n = 0;                                                       \
-    *hotkeys =                                                          \
-                 (struct PluginHotkey **) malloc(sizeof(struct PluginHotkey *) * sz);
+// Some macros to make the code to create hotkeys a bit more readable
+
+#define BEGIN_CREATE_HOTKEYS(x)                             \
+    const size_t sz = x + 1;                                \
+    size_t n = 0;                                           \
+    *hotkeys = (hotkey_t**) malloc(sizeof(hotkey_t*) * sz);
+
 #define CREATE_HOTKEY(a, b) (*hotkeys)[n++] = createHotkey(a, b);
+
 #define END_CREATE_HOTKEYS                      \
     (*hotkeys)[n++] = NULL;                     \
     assert(n == sz);
 
-/*
- * Initialize plugin hotkeys. If your plugin does not use this feature, this
- * function can be omitted.
- * Hotkeys require ts3plugin_registerPluginID and ts3plugin_freeMemory to be
- * implemented.
- * This function is automatically called by the client after ts3plugin_init.
- */
+//! Initialize plugin hotkeys.
+//! If your plugin does not use this feature, this function can be omitted.
+//! Hotkeys require ts3plugin_registerPluginID and ts3plugin_freeMemory to be
+//! implemented.
+//! This function is automatically called by the client after ts3plugin_init.
 void ts3plugin_initHotkeys(struct PluginHotkey ***hotkeys) {
-    /* Register hotkeys giving a keyword and a description.
-     * The keyword will be later passed to ts3plugin_onHotkeyEvent to identify
-     * which hotkey was triggered.
-     * The description is shown in the clients hotkey dialog. */
-    BEGIN_CREATE_HOTKEYS(
-        3); /* Create 3 hotkeys. Size must be correct for allocating memory. */
+    // FIXME: cleanup
+
+    // Register hotkeys giving a keyword and a description.
+    // The keyword will be later passed to ts3plugin_onHotkeyEvent to identify
+    // which hotkey was triggered.
+    // The description is shown in the clients hotkey dialog.
+
+    // Create 3 hotkeys. Size must be correct for allocating memory.
+    BEGIN_CREATE_HOTKEYS(3);
     CREATE_HOTKEY("keyword_1", "Test hotkey 1");
     CREATE_HOTKEY("keyword_2", "Test hotkey 2");
     CREATE_HOTKEY("keyword_3", "Test hotkey 3");
     END_CREATE_HOTKEYS;
 
-    /* The client will call ts3plugin_freeMemory to release all allocated memory
-     */
+    // The client will call ts3plugin_freeMemory to release all allocated memory
 }
 
-/************************** TeamSpeak callbacks ***************************/
-/*
- * Following functions are optional, feel free to remove unused callbacks.
- * See the clientlib documentation for details on each function.
- */
+// -----------------------------------------------------------------------------
+// -- TeamSpeak ClientLib callbacks --------------------------------------------
+// -----------------------------------------------------------------------------
 
-/* Clientlib */
-
+//! FIXME: docstring
 void ts3plugin_onConnectStatusChangeEvent(uint64_t schandlerID,
                                           int32_t newStatus,
-                                          uint32_t errorNumber) {}
+                                          uint32_t errorNumber) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onNewChannelEvent(uint64_t schandlerID,
                                  uint64_t channelID,
                                  uint64_t channelParentID) {
     Json::Value root;
-    root["tag"] = "NewChannel";
-    root["_NewChannel_schandlerID"] = (int) schandlerID;
-    root["_NewChannel_channelParentID"] = (int) channelParentID;
-    root["_NewChannel_channelID"] = (int) channelID;
+    root["tag"]             = "NewChannel";
+    root["schandlerID"]     = (int) schandlerID;
+    root["channelParentID"] = (int) channelParentID;
+    root["channelID"]       = (int) channelID;
     rpc_server->send_event(root);
 }
 
+//! FIXME: docstring
 void ts3plugin_onNewChannelCreatedEvent(uint64_t schandlerID,
                                         uint64_t channelID,
                                         uint64_t channelParentID,
@@ -443,63 +460,88 @@ void ts3plugin_onNewChannelCreatedEvent(uint64_t schandlerID,
                                         ccstring_t invokerName,
                                         ccstring_t invokerUID) {
     Json::Value root;
-    root["tag"] = "NewChannelCreated";
-    root["_NewChannelCreated_schandlerID"] = (int) schandlerID;
-    root["_NewChannelCreated_channelID"] = (int) channelID;
-    root["_NewChannelCreated_cparentID"] = (int) channelParentID;
-    root["_NewChannelCreated_invokerID"] = invokerID;
-    root["_NewChannelCreated_invokerName"] = invokerName;
-    root["_NewChannelCreated_invokerUID"] = invokerUID;
+    root["tag"]         = "NewChannelCreated";
+    root["schandlerID"] = (int) schandlerID;
+    root["channelID"]   = (int) channelID;
+    root["cparentID"]   = (int) channelParentID;
+    root["invokerID"]   = invokerID;
+    root["invokerName"] = invokerName;
+    root["invokerUID"]  = invokerUID;
     rpc_server->send_event(root);
 }
 
+//! FIXME: docstring
 void ts3plugin_onDelChannelEvent(uint64_t schandlerID,
                                  uint64_t channelID,
                                  ident_t invokerID,
                                  ccstring_t invokerName,
-                                 ccstring_t invokerUID) {}
+                                 ccstring_t invokerUID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onChannelMoveEvent(uint64_t schandlerID,
                                   uint64_t channelID,
                                   uint64_t newChannelParentID,
                                   ident_t invokerID,
                                   ccstring_t invokerName,
-                                  ccstring_t invokerUID) {}
+                                  ccstring_t invokerUID) {
+    // FIXME: implement
+}
 
-void ts3plugin_onUpdateChannelEvent(uint64_t schandlerID, uint64_t channelID) {}
+//! FIXME: docstring
+void ts3plugin_onUpdateChannelEvent(uint64_t schandlerID, uint64_t channelID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onUpdateChannelEditedEvent(uint64_t schandlerID,
                                           uint64_t channelID,
                                           ident_t invokerID,
                                           ccstring_t invokerName,
-                                          ccstring_t invokerUID) {}
+                                          ccstring_t invokerUID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onUpdateClientEvent(uint64_t schandlerID,
                                    ident_t clientID,
                                    ident_t invokerID,
                                    ccstring_t invokerName,
-                                   ccstring_t invokerUID) {}
+                                   ccstring_t invokerUID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onClientMoveEvent(uint64_t schandlerID,
                                  ident_t clientID,
                                  uint64_t oldChannelID,
                                  uint64_t newChannelID,
                                  int32_t visibility,
-                                 ccstring_t moveMessage) {}
+                                 ccstring_t moveMessage) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onClientMoveSubscriptionEvent(uint64_t schandlerID,
                                              ident_t clientID,
                                              uint64_t oldChannelID,
                                              uint64_t newChannelID,
-                                             int32_t visibility) {}
+                                             int32_t visibility) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onClientMoveTimeoutEvent(uint64_t schandlerID,
                                         ident_t clientID,
                                         uint64_t oldChannelID,
                                         uint64_t newChannelID,
                                         int32_t visibility,
-                                        ccstring_t timeoutMessage) {}
+                                        ccstring_t timeoutMessage) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onClientMoveMovedEvent(uint64_t schandlerID,
                                       ident_t clientID,
                                       uint64_t oldChannelID,
@@ -508,8 +550,11 @@ void ts3plugin_onClientMoveMovedEvent(uint64_t schandlerID,
                                       ident_t moverID,
                                       ccstring_t moverName,
                                       ccstring_t moverUID,
-                                      ccstring_t moveMessage) {}
+                                      ccstring_t moveMessage) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onClientKickFromChannelEvent(uint64_t schandlerID,
                                             ident_t clientID,
                                             uint64_t oldChannelID,
@@ -518,8 +563,11 @@ void ts3plugin_onClientKickFromChannelEvent(uint64_t schandlerID,
                                             ident_t kickerID,
                                             ccstring_t kickerName,
                                             ccstring_t kickerUID,
-                                            ccstring_t kickMessage) {}
+                                            ccstring_t kickMessage) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onClientKickFromServerEvent(uint64_t schandlerID,
                                            ident_t clientID,
                                            uint64_t oldChannelID,
@@ -528,47 +576,66 @@ void ts3plugin_onClientKickFromServerEvent(uint64_t schandlerID,
                                            ident_t kickerID,
                                            ccstring_t kickerName,
                                            ccstring_t kickerUID,
-                                           ccstring_t kickMessage) {}
+                                           ccstring_t kickMessage) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onClientIDsEvent(uint64_t schandlerID,
                                 ccstring_t clientUID,
                                 ident_t clientID,
-                                ccstring_t clientName) {}
+                                ccstring_t clientName) {
+    // FIXME: implement
+}
 
-void ts3plugin_onClientIDsFinishedEvent(uint64_t schandlerID) {}
+//! FIXME: docstring
+void ts3plugin_onClientIDsFinishedEvent(uint64_t schandlerID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onServerEditedEvent(uint64_t schandlerID,
                                    ident_t editorID,
                                    ccstring_t editorName,
-                                   ccstring_t editorUID) {}
+                                   ccstring_t editorUID) {
+    // FIXME: implement
+}
 
-void ts3plugin_onServerUpdatedEvent(uint64_t schandlerID) {}
+//! FIXME: docstring
+void ts3plugin_onServerUpdatedEvent(uint64_t schandlerID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 int32_t ts3plugin_onServerErrorEvent(uint64_t schandlerID,
                                      ccstring_t errorMessage,
                                      uint32_t error,
                                      ccstring_t returnCode,
                                      ccstring_t extraMessage) {
+    // FIXME: cleanup
     printf("PLUGIN: onServerErrorEvent %llu %s %d %s\n",
            (long long unsigned int) schandlerID,
            errorMessage,
            error,
            (returnCode ? returnCode : ""));
     if(returnCode) {
-        /* A plugin could now check the returnCode with previously (when calling
-         * a function) remembered returnCodes and react accordingly */
-        /* In case of using a a plugin return code, the plugin can return:
-         * 0: Client will continue handling this error (print32_t to chat tab)
-         * 1: Client will ignore this error, the plugin announces it has handled
-         * it */
+        // A plugin could now check the returnCode with previously (when calling
+        // a function) remembered returnCodes and react accordingly
+        // In case of using a a plugin return code, the plugin can return:
+        // 0: Client will continue handling this error (print32_t to chat tab)
+        // 1: Client will ignore this error, the plugin announces it has handled
+        // it
         return 1;
     }
     return 0; /* If no plugin return code was used, the return value of this
                  function is ignored */
 }
 
+//! FIXME: docstring
 void ts3plugin_onServerStopEvent(uint64_t schandlerID,
-                                 ccstring_t shutdownMessage) {}
+                                 ccstring_t shutdownMessage) {
+    // FIXME: implement
+}
 
 //! Triggered when a text message event is received
 //!
@@ -583,24 +650,26 @@ int32_t ts3plugin_onTextMessageEvent(uint64_t schandlerID,
                                      ccstring_t message,
                                      int32_t ffIgnored) {
     Json::Value root;
-    root["tag"] = "TextMessage";
-    root["schandlerID"] = (int) schandlerID;
-    root["targetMode"] = targetMode;
-    root["toID"] = toID;
-    root["fromID"] = fromID;
-    root["fromName"] = fromName;
-    root["fromUID"] = fromUID;
-    root["message"] = message;
-    root["ffIgnored"] = ffIgnored;
+    root["tag"]         = "TextMessage";
+    root["schandlerID"] = (int32_t) schandlerID;
+    root["targetMode"]  = targetMode;
+    root["toID"]        = toID;
+    root["fromID"]      = fromID;
+    root["fromName"]    = fromName;
+    root["fromUID"]     = fromUID;
+    root["message"]     = message;
+    root["ffIgnored"]   = ffIgnored;
     rpc_server->send_event(root);
     return 0;
 }
 
+//! FIXME: docstring
 void ts3plugin_onTalkStatusChangeEvent(uint64_t schandlerID,
                                        int32_t status,
                                        int32_t isReceivedWhisper,
                                        ident_t clientID) {
-    /* Demonstrate usage of getClientDisplayName */
+    // FIXME: cleanup
+    // Demonstrate usage of getClientDisplayName
     char name[512];
     if(ts3Functions.getClientDisplayName(schandlerID, clientID, name, 512) ==
        ERROR_ok) {
@@ -618,78 +687,131 @@ void ts3plugin_onTalkStatusChangeEvent(uint64_t schandlerID,
     }
 }
 
-void ts3plugin_onConnectionInfoEvent(uint64_t schandlerID, ident_t clientID) {}
+//! FIXME: docstring
+void ts3plugin_onConnectionInfoEvent(uint64_t schandlerID, ident_t clientID) {
+    // FIXME: implement
+}
 
-void ts3plugin_onServerConnectionInfoEvent(uint64_t schandlerID) {}
+//! FIXME: docstring
+void ts3plugin_onServerConnectionInfoEvent(uint64_t schandlerID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onChannelSubscribeEvent(uint64_t schandlerID,
-                                       uint64_t channelID) {}
+                                       uint64_t channelID) {
+    // FIXME: implement
+}
 
-void ts3plugin_onChannelSubscribeFinishedEvent(uint64_t schandlerID) {}
+//! FIXME: docstring
+void ts3plugin_onChannelSubscribeFinishedEvent(uint64_t schandlerID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onChannelUnsubscribeEvent(uint64_t schandlerID,
-                                         uint64_t channelID) {}
+                                         uint64_t channelID) {
+    // FIXME: implement
+}
 
-void ts3plugin_onChannelUnsubscribeFinishedEvent(uint64_t schandlerID) {}
+//! FIXME: docstring
+void ts3plugin_onChannelUnsubscribeFinishedEvent(uint64_t schandlerID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onChannelDescriptionUpdateEvent(uint64_t schandlerID,
-                                               uint64_t channelID) {}
+                                               uint64_t channelID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onChannelPasswordChangedEvent(uint64_t schandlerID,
-                                             uint64_t channelID) {}
+                                             uint64_t channelID) {
+    // FIXME: implement
+}
 
-void ts3plugin_onPlaybackShutdownCompleteEvent(uint64_t schandlerID) {}
+//! FIXME: docstring
+void ts3plugin_onPlaybackShutdownCompleteEvent(uint64_t schandlerID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onSoundDeviceListChangedEvent(ccstring_t modeID,
-                                             int32_t playOrCap) {}
+                                             int32_t playOrCap) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onEditPlaybackVoiceDataEvent(uint64_t schandlerID,
                                             ident_t clientID,
                                             short *samples,
                                             int32_t sampleCount,
-                                            int32_t channels) {}
+                                            int32_t channels) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onEditPostProcessVoiceDataEvent(uint64_t schandlerID,
                                                ident_t clientID,
                                                short *samples,
                                                int32_t sampleCount,
                                                int32_t channels,
                                                const uint32_t* speakers,
-                                               uint32_t* fillMask) {}
+                                               uint32_t* fillMask) {
+    // FIXME: implement
+}
 
-void ts3plugin_onEditMixedPlaybackVoiceDataEvent(
-    uint64_t schandlerID,
-    short *samples,
-    int32_t sampleCount,
-    int32_t channels,
-    const uint32_t *channelSpeakerArray,
-    uint32_t *channelFillMask) {}
+//! FIXME: docstring
+void ts3plugin_onEditMixedPlaybackVoiceDataEvent(uint64_t schandlerID,
+                                                 short *samples,
+                                                 int32_t sampleCount,
+                                                 int32_t channels,
+                                                 const uint32_t *speakers,
+                                                 uint32_t *fillMask) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onEditCapturedVoiceDataEvent(uint64_t schandlerID,
                                             short *samples,
                                             int32_t sampleCount,
                                             int32_t channels,
-                                            int32_t *edited) {}
+                                            int32_t *edited) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onCustom3dRolloffCalculationClientEvent(uint64_t schandlerID,
                                                        ident_t clientID,
                                                        float distance,
-                                                       float *volume) {}
+                                                       float *volume) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onCustom3dRolloffCalculationWaveEvent(uint64_t schandlerID,
                                                      uint64_t waveHandle,
                                                      float distance,
-                                                     float *volume) {}
+                                                     float *volume) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onUserLoggingMessageEvent(ccstring_t logMessage,
                                          int32_t logLevel,
                                          ccstring_t logChannel,
                                          uint64_t logID,
                                          ccstring_t logTime,
-                                         ccstring_t completeLogString) {}
+                                         ccstring_t completeLogString) {
+    // FIXME: implement
+}
 
-/* Clientlib rare */
+// -----------------------------------------------------------------------------
+// -- TeamSpeak ClientLib rare callbacks ---------------------------------------
+// -----------------------------------------------------------------------------
 
+//! FIXME: docstring
 void ts3plugin_onClientBanFromServerEvent(uint64_t schandlerID,
                                           ident_t clientID,
                                           uint64_t oldChannelID,
@@ -699,8 +821,11 @@ void ts3plugin_onClientBanFromServerEvent(uint64_t schandlerID,
                                           ccstring_t kickerName,
                                           ccstring_t kickerUID,
                                           uint64_t time,
-                                          ccstring_t kickMessage) {}
+                                          ccstring_t kickMessage) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 int32_t ts3plugin_onClientPokeEvent(uint64_t schandlerID,
                                     ident_t fromClientID,
                                     ccstring_t pokerName,
@@ -714,14 +839,18 @@ int32_t ts3plugin_onClientPokeEvent(uint64_t schandlerID,
     root["pokerName"] = pokerName;
     root["message"] = message;
     rpc_server->send_event(root);
-    return 0; /* 0 = handle normally, 1 = client will ignore the poke */
+    return 0; // 0 = handle normally, 1 = client will ignore the poke
 }
 
+//! FIXME: docstring
 void ts3plugin_onClientSelfVariableUpdateEvent(uint64_t schandlerID,
                                                int32_t flag,
                                                ccstring_t oldValue,
-                                               ccstring_t newValue) {}
+                                               ccstring_t newValue) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onFileListEvent(uint64_t schandlerID,
                                uint64_t channelID,
                                ccstring_t path,
@@ -730,125 +859,195 @@ void ts3plugin_onFileListEvent(uint64_t schandlerID,
                                uint64_t datetime,
                                int32_t type,
                                uint64_t incompletesize,
-                               ccstring_t returnCode) {}
+                               ccstring_t returnCode) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onFileListFinishedEvent(uint64_t schandlerID,
                                        uint64_t channelID,
-                                       ccstring_t path) {}
+                                       ccstring_t path) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onFileInfoEvent(uint64_t schandlerID,
                                uint64_t channelID,
                                ccstring_t name,
                                uint64_t size,
-                               uint64_t datetime) {}
+                               uint64_t datetime) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onServerGroupListEvent(uint64_t schandlerID,
                                       uint64_t serverGroupID,
                                       ccstring_t name,
                                       int32_t type,
                                       int32_t iconID,
-                                      int32_t saveDB) {}
+                                      int32_t saveDB) {
+    // FIXME: implement
+}
 
-void ts3plugin_onServerGroupListFinishedEvent(uint64_t schandlerID) {}
+//! FIXME: docstring
+void ts3plugin_onServerGroupListFinishedEvent(uint64_t schandlerID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onServerGroupByClientIDEvent(uint64_t schandlerID,
                                             ccstring_t name,
                                             uint64_t serverGroupList,
-                                            uint64_t clientDBID) {}
+                                            uint64_t clientDBID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onServerGroupPermListEvent(uint64_t schandlerID,
                                           uint64_t serverGroupID,
                                           uint32_t permissionID,
                                           int32_t permissionValue,
                                           int32_t permissionNegated,
-                                          int32_t permissionSkip) {}
+                                          int32_t permissionSkip) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onServerGroupPermListFinishedEvent(uint64_t schandlerID,
-                                                  uint64_t serverGroupID) {}
+                                                  uint64_t serverGroupID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onServerGroupClientListEvent(uint64_t schandlerID,
                                             uint64_t serverGroupID,
                                             uint64_t clientDBID,
                                             ccstring_t clientNameIdentifier,
-                                            ccstring_t clientUniqueID) {}
+                                            ccstring_t clientUniqueID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onChannelGroupListEvent(uint64_t schandlerID,
                                        uint64_t channelGroupID,
                                        ccstring_t name,
                                        int32_t type,
                                        int32_t iconID,
-                                       int32_t saveDB) {}
+                                       int32_t saveDB) {
+    // FIXME: implement
+}
 
-void ts3plugin_onChannelGroupListFinishedEvent(uint64_t schandlerID) {}
+//! FIXME: docstring
+void ts3plugin_onChannelGroupListFinishedEvent(uint64_t schandlerID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onChannelGroupPermListEvent(uint64_t schandlerID,
                                            uint64_t channelGroupID,
                                            uint32_t permissionID,
                                            int32_t permissionValue,
                                            int32_t permissionNegated,
-                                           int32_t permissionSkip) {}
+                                           int32_t permissionSkip) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onChannelGroupPermListFinishedEvent(uint64_t schandlerID,
-                                                   uint64_t channelGroupID) {}
+                                                   uint64_t channelGroupID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onChannelPermListEvent(uint64_t schandlerID,
                                       uint64_t channelID,
                                       uint32_t permissionID,
                                       int32_t permissionValue,
                                       int32_t permissionNegated,
-                                      int32_t permissionSkip) {}
+                                      int32_t permissionSkip) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onChannelPermListFinishedEvent(uint64_t schandlerID,
-                                              uint64_t channelID) {}
+                                              uint64_t channelID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onClientPermListEvent(uint64_t schandlerID,
                                      uint64_t clientDBID,
                                      uint32_t permissionID,
                                      int32_t permissionValue,
                                      int32_t permissionNegated,
-                                     int32_t permissionSkip) {}
+                                     int32_t permissionSkip) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onClientPermListFinishedEvent(uint64_t schandlerID,
-                                             uint64_t clientDBID) {}
+                                             uint64_t clientDBID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onChannelClientPermListEvent(uint64_t schandlerID,
                                             uint64_t channelID,
                                             uint64_t clientDBID,
                                             uint32_t permissionID,
                                             int32_t permissionValue,
                                             int32_t permissionNegated,
-                                            int32_t permissionSkip) {}
+                                            int32_t permissionSkip) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onChannelClientPermListFinishedEvent(uint64_t schandlerID,
                                                     uint64_t channelID,
-                                                    uint64_t clientDBID) {}
+                                                    uint64_t clientDBID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onClientChannelGroupChangedEvent(uint64_t schandlerID,
                                                 uint64_t channelGroupID,
                                                 uint64_t channelID,
                                                 ident_t clientID,
                                                 ident_t invokerClientID,
                                                 ccstring_t invokerName,
-                                                ccstring_t invokerUID) {}
+                                                ccstring_t invokerUID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 int32_t ts3plugin_onServerPermissionErrorEvent(uint64_t schandlerID,
                                                ccstring_t errorMessage,
                                                uint32_t error,
                                                ccstring_t returnCode,
                                                uint32_t failedPermissionID) {
-    return 0; /* See onServerErrorEvent for return code description */
+    return 0; // See onServerErrorEvent for return code description
 }
 
+//! FIXME: docstring
 void ts3plugin_onPermissionListGroupEndIDEvent(uint64_t schandlerID,
-                                               uint32_t groupEndID) {}
+                                               uint32_t groupEndID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onPermissionListEvent(uint64_t schandlerID,
                                      uint32_t permissionID,
                                      ccstring_t permissionName,
-                                     ccstring_t permissionDescription) {}
+                                     ccstring_t permissionDescription) {
+    // FIXME: implement
+}
 
-void ts3plugin_onPermissionListFinishedEvent(uint64_t schandlerID) {}
+//! FIXME: docstring
+void ts3plugin_onPermissionListFinishedEvent(uint64_t schandlerID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onPermissionOverviewEvent(uint64_t schandlerID,
                                          uint64_t clientDBID,
                                          uint64_t channelID,
@@ -858,10 +1057,16 @@ void ts3plugin_onPermissionOverviewEvent(uint64_t schandlerID,
                                          uint32_t permissionID,
                                          int32_t permissionValue,
                                          int32_t permissionNegated,
-                                         int32_t permissionSkip) {}
+                                         int32_t permissionSkip) {
+    // FIXME: implement
+}
 
-void ts3plugin_onPermissionOverviewFinishedEvent(uint64_t schandlerID) {}
+//! FIXME: docstring
+void ts3plugin_onPermissionOverviewFinishedEvent(uint64_t schandlerID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onServerGroupClientAddedEvent(uint64_t schandlerID,
                                              ident_t clientID,
                                              ccstring_t clientName,
@@ -869,8 +1074,11 @@ void ts3plugin_onServerGroupClientAddedEvent(uint64_t schandlerID,
                                              uint64_t serverGroupID,
                                              ident_t invokerClientID,
                                              ccstring_t invokerName,
-                                             ccstring_t invokerUID) {}
+                                             ccstring_t invokerUID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onServerGroupClientDeletedEvent(uint64_t schandlerID,
                                                ident_t clientID,
                                                ccstring_t clientName,
@@ -878,70 +1086,112 @@ void ts3plugin_onServerGroupClientDeletedEvent(uint64_t schandlerID,
                                                uint64_t serverGroupID,
                                                ident_t invokerClientID,
                                                ccstring_t invokerName,
-                                               ccstring_t invokerUID) {}
+                                               ccstring_t invokerUID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onClientNeededPermissionsEvent(uint64_t schandlerID,
                                               uint32_t permissionID,
-                                              int32_t permissionValue) {}
+                                              int32_t permissionValue) {
+    // FIXME: implement
+}
 
-void ts3plugin_onClientNeededPermissionsFinishedEvent(uint64_t schandlerID) {}
+//! FIXME: docstring
+void ts3plugin_onClientNeededPermissionsFinishedEvent(uint64_t schandlerID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onFileTransferStatusEvent(ident_t transferID,
                                          uint32_t status,
                                          ccstring_t statusMessage,
                                          uint64_t remotefileSize,
-                                         uint64_t schandlerID) {}
+                                         uint64_t schandlerID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onClientChatClosedEvent(uint64_t schandlerID,
                                        ident_t clientID,
-                                       ccstring_t clientUID) {}
+                                       ccstring_t clientUID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onClientChatComposingEvent(uint64_t schandlerID,
                                           ident_t clientID,
-                                          ccstring_t clientUID) {}
+                                          ccstring_t clientUID) {
+    // FIXME: implement
+}
 
-void ts3plugin_onServerLogEvent(uint64_t schandlerID, ccstring_t logMsg) {}
+//! FIXME: docstring
+void ts3plugin_onServerLogEvent(uint64_t schandlerID, ccstring_t logMsg) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onServerLogFinishedEvent(uint64_t schandlerID,
                                         uint64_t lastPos,
-                                        uint64_t fileSize) {}
+                                        uint64_t fileSize) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onMessageListEvent(uint64_t schandlerID,
                                   uint64_t messageID,
                                   ccstring_t fromClientUID,
                                   ccstring_t subject,
                                   uint64_t timestamp,
-                                  int32_t flagRead) {}
+                                  int32_t flagRead) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onMessageGetEvent(uint64_t schandlerID,
                                  uint64_t messageID,
                                  ccstring_t fromClientUID,
                                  ccstring_t subject,
                                  ccstring_t message,
-                                 uint64_t timestamp) {}
+                                 uint64_t timestamp) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onClientDBIDfromUIDEvent(uint64_t schandlerID,
                                         ccstring_t clientUID,
-                                        uint64_t clientDBID) {}
+                                        uint64_t clientDBID) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onClientNamefromUIDEvent(uint64_t schandlerID,
                                         ccstring_t clientUID,
                                         uint64_t clientDBID,
-                                        ccstring_t clientNickName) {}
+                                        ccstring_t clientNickName) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onClientNamefromDBIDEvent(uint64_t schandlerID,
                                          ccstring_t clientUID,
                                          uint64_t clientDBID,
-                                         ccstring_t clientNickName) {}
+                                         ccstring_t clientNickName) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onComplainListEvent(uint64_t schandlerID,
                                    uint64_t targetClientDBID,
                                    ccstring_t targetClientNickName,
                                    uint64_t fromClientDBID,
                                    ccstring_t fromClientNickName,
                                    ccstring_t complainReason,
-                                   uint64_t timestamp) {}
+                                   uint64_t timestamp) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onBanListEvent(uint64_t schandlerID,
                               uint64_t banID,
                               ccstring_t ip,
@@ -954,20 +1204,31 @@ void ts3plugin_onBanListEvent(uint64_t schandlerID,
                               ccstring_t invokeruid,
                               ccstring_t reason,
                               int32_t numberOfEnforcements,
-                              ccstring_t lastNickName) {}
+                              ccstring_t lastNickName) {
+    // FIXME: implement
+}
 
-void ts3plugin_onClientServerQueryLoginPasswordEvent(
-    uint64_t schandlerID, ccstring_t loginPassword) {}
+//! FIXME: docstring
+void ts3plugin_onClientServerQueryLoginPasswordEvent(uint64_t schandlerID,
+                                                     ccstring_t password) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onPluginCommandEvent(uint64_t schandlerID,
                                     ccstring_t pluginName,
                                     ccstring_t pluginCommand) {
+    // FIXME: cleanup
     printf("ON PLUGIN COMMAND: %s %s\n", pluginName, pluginCommand);
 }
 
+//! FIXME: docstring
 void ts3plugin_onIncomingClientQueryEvent(uint64_t schandlerID,
-                                          ccstring_t commandText) {}
+                                          ccstring_t commandText) {
+    // FIXME: implement
+}
 
+//! FIXME: docstring
 void ts3plugin_onServerTemporaryPasswordListEvent(uint64_t schandlerID,
                                                   ccstring_t clientNickname,
                                                   ccstring_t clientUID,
@@ -977,56 +1238,64 @@ void ts3plugin_onServerTemporaryPasswordListEvent(uint64_t schandlerID,
                                                   uint64_t timestampEnd,
                                                   uint64_t targetChannelID,
                                                   ccstring_t targetChannelPW) {
+    // FIXME: implement
 }
 
-/* Client UI callbacks */
+// -----------------------------------------------------------------------------
+// -- TeamSpeak Client UI callbacks --------------------------------------------
+// -----------------------------------------------------------------------------
 
-/*
- * Called from client when an avatar image has been downloaded to or deleted
- * from cache.
- * This callback can be called spontaneously or in response to
- * ts3Functions.getAvatar()
- */
+//! Called from client when an avatar image has been downloaded to or deleted
+//! from cache.
+//! This callback can be called spontaneously or in response to
+//! ts3Functions.getAvatar()
 void ts3plugin_onAvatarUpdated(uint64_t schandlerID,
                                ident_t clientID,
                                ccstring_t avatarPath) {
-    /* If avatarPath is NULL, the avatar got deleted */
-    /* If not NULL, avatarPath contains the path to the avatar file in the
-     * TS3Client cache */
+    // FIXME: implement
+    // If avatarPath is NULL, the avatar got deleted
+    // If not NULL, avatarPath contains the path to the avatar file in the
+    // TS3Client cache.
 }
 
-/*
- * Called when a plugin menu item (see ts3plugin_initMenus) is triggered.
- * Optional function, when not using plugin menus, do not implement this.
- *
- * Parameters:
- * - schandlerID: ID of the current server tab
- * - type: Type of the menu (PLUGIN_MENU_TYPE_CHANNEL, PLUGIN_MENU_TYPE_CLIENT
- * or PLUGIN_MENU_TYPE_GLOBAL)
- * - menuItemID: Id used when creating the menu item
- * - selectedItemID: Channel or Client ID in the case of
- * PLUGIN_MENU_TYPE_CHANNEL and PLUGIN_MENU_TYPE_CLIENT. 0 for
- * PLUGIN_MENU_TYPE_GLOBAL.
- */
+//! Called when a plugin menu item (see ts3plugin_initMenus) is triggered.
+//! Optional function, when not using plugin menus, do not implement this.
+//!
+//! Parameters:
+//! - schandlerID: ID of the current server tab
+//! - type: Type of the menu (PLUGIN_MENU_TYPE_CHANNEL, PLUGIN_MENU_TYPE_CLIENT
+//! or PLUGIN_MENU_TYPE_GLOBAL)
+//! - menuItemID: Id used when creating the menu item
+//! - selectedItemID: Channel or Client ID in the case of
+//! PLUGIN_MENU_TYPE_CHANNEL and PLUGIN_MENU_TYPE_CLIENT. 0 for
+//! PLUGIN_MENU_TYPE_GLOBAL.
 void ts3plugin_onMenuItemEvent(uint64_t schandlerID,
                                menu_type_t type,
                                int32_t menuItemID,
-                               uint64_t selectedItemID) {}
-
-/* This function is called if a plugin hotkey was pressed. Omit if hotkeys are
- * unused. */
-void ts3plugin_onHotkeyEvent(ccstring_t keyword) {
-    printf("PLUGIN: Hotkey event: %s\n", keyword);
-    /* Identify the hotkey by keyword ("keyword_1", "keyword_2" or "keyword_3"
-     * in this example) and handle here... */
+                               uint64_t selectedItemID) {
+    // FIXME: implement
 }
 
-/* Called when recording a hotkey has finished after calling
- * ts3Functions.requestHotkeyInputDialog */
-void ts3plugin_onHotkeyRecordedEvent(ccstring_t keyword, ccstring_t key) {}
+//! This function is called if a plugin hotkey was pressed.
+//! Omit if hotkeys are unused.
+void ts3plugin_onHotkeyEvent(ccstring_t keyword) {
+    // FIXME: cleanup
+    // FIXME: implement
+    printf("PLUGIN: Hotkey event: %s\n", keyword);
+    // Identify the hotkey by keyword ("keyword_1", "keyword_2" or "keyword_3"
+    // in this example) and handle here...
+}
 
-/* Called when client custom nickname changed */
+//! Called when recording a hotkey has finished after calling
+//! ts3Functions.requestHotkeyInputDialog
+void ts3plugin_onHotkeyRecordedEvent(ccstring_t keyword, ccstring_t key) {
+    // FIXME: implement
+}
+
+//! Called when client custom nickname changed
 void ts3plugin_onClientDisplayNameChanged(uint64_t schandlerID,
                                           ident_t clientID,
                                           ccstring_t displayName,
-                                          ccstring_t clientUID) {}
+                                          ccstring_t clientUID) {
+    // FIXME: implement
+}
