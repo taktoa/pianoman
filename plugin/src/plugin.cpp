@@ -439,8 +439,9 @@ void ts3plugin_onConnectStatusChangeEvent(uint64_t schandlerID,
                                           uint32_t errorNumber) {
     Json::Value root;
     root["tag"]         = "ConnectStatusChange";
-    root["schandlerID"] = Json::Int64(schandlerID);
-    // FIXME: add rest of key-value pairs
+    root["schandlerID"] = Json::UInt64(schandlerID);
+    root["newStatus"]   = newStatus;
+    root["errorNumber"] = errorNumber;
     rpc_server->send_event(root);
 }
 
@@ -450,9 +451,9 @@ void ts3plugin_onNewChannelEvent(uint64_t schandlerID,
                                  uint64_t channelParentID) {
     Json::Value root;
     root["tag"]             = "NewChannel";
-    root["schandlerID"]     = (int) schandlerID;
-    root["channelParentID"] = (int) channelParentID;
-    root["channelID"]       = (int) channelID;
+    root["schandlerID"]     = Json::UInt64(schandlerID);
+    root["channelID"]       = Json::UInt64(channelID);
+    root["channelParentID"] = Json::UInt64(channelParentID);
     rpc_server->send_event(root);
 }
 
@@ -465,9 +466,9 @@ void ts3plugin_onNewChannelCreatedEvent(uint64_t schandlerID,
                                         ccstring_t invokerUID) {
     Json::Value root;
     root["tag"]         = "NewChannelCreated";
-    root["schandlerID"] = (int) schandlerID;
-    root["channelID"]   = (int) channelID;
-    root["cparentID"]   = (int) channelParentID;
+    root["schandlerID"] = Json::UInt64(schandlerID);
+    root["channelID"]   = Json::UInt64(channelID);
+    root["cparentID"]   = Json::UInt64(channelParentID);
     root["invokerID"]   = invokerID;
     root["invokerName"] = invokerName;
     root["invokerUID"]  = invokerUID;
@@ -482,8 +483,11 @@ void ts3plugin_onDelChannelEvent(uint64_t schandlerID,
                                  ccstring_t invokerUID) {
     Json::Value root;
     root["tag"]         = "DelChannel";
-    root["schandlerID"] = Json::Int64(schandlerID);
-    // FIXME: add rest of key-value pairs
+    root["schandlerID"] = Json::UInt64(schandlerID);
+    root["channelID"]   = Json::UInt64(channelID);
+    root["invokerID"]   = invokerID;
+    root["invokerName"] = invokerName;
+    root["invokerUID"]  = invokerUID;
     rpc_server->send_event(root);
 }
 
@@ -495,9 +499,13 @@ void ts3plugin_onChannelMoveEvent(uint64_t schandlerID,
                                   ccstring_t invokerName,
                                   ccstring_t invokerUID) {
     Json::Value root;
-    root["tag"]         = "ChannelMove";
-    root["schandlerID"] = Json::Int64(schandlerID);
-    // FIXME: add rest of key-value pairs
+    root["tag"]                = "ChannelMove";
+    root["schandlerID"]        = Json::UInt64(schandlerID);
+    root["channelID"]          = Json::UInt64(channelID);
+    root["newChannelParentID"] = Json::UInt64(newChannelParentID);
+    root["invokerID"]          = invokerID;
+    root["invokerName"]        = invokerName;
+    root["invokerUID"]         = invokerUID;
     rpc_server->send_event(root);
 }
 
@@ -505,8 +513,8 @@ void ts3plugin_onChannelMoveEvent(uint64_t schandlerID,
 void ts3plugin_onUpdateChannelEvent(uint64_t schandlerID, uint64_t channelID) {
     Json::Value root;
     root["tag"]         = "UpdateChannel";
-    root["schandlerID"] = Json::Int64(schandlerID);
-    // FIXME: add rest of key-value pairs
+    root["schandlerID"] = Json::UInt64(schandlerID);
+    root["channelID"]   = Json::UInt64(channelID);
     rpc_server->send_event(root);
 }
 
@@ -518,7 +526,8 @@ void ts3plugin_onUpdateChannelEditedEvent(uint64_t schandlerID,
                                           ccstring_t invokerUID) {
     Json::Value root;
     root["tag"]         = "UpdateChannelEdited";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
+    root["channelID"]   = Json::UInt64(channelID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -531,7 +540,7 @@ void ts3plugin_onUpdateClientEvent(uint64_t schandlerID,
                                    ccstring_t invokerUID) {
     Json::Value root;
     root["tag"]         = "UpdateClient";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -545,7 +554,7 @@ void ts3plugin_onClientMoveEvent(uint64_t schandlerID,
                                  ccstring_t moveMessage) {
     Json::Value root;
     root["tag"]         = "ClientMove";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -558,7 +567,7 @@ void ts3plugin_onClientMoveSubscriptionEvent(uint64_t schandlerID,
                                              int32_t visibility) {
     Json::Value root;
     root["tag"]         = "ClientMoveSubscription";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -572,7 +581,7 @@ void ts3plugin_onClientMoveTimeoutEvent(uint64_t schandlerID,
                                         ccstring_t timeoutMessage) {
     Json::Value root;
     root["tag"]         = "ClientMoveTimeout";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -589,7 +598,7 @@ void ts3plugin_onClientMoveMovedEvent(uint64_t schandlerID,
                                       ccstring_t moveMessage) {
     Json::Value root;
     root["tag"]         = "ClientMoveMoved";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -606,7 +615,7 @@ void ts3plugin_onClientKickFromChannelEvent(uint64_t schandlerID,
                                             ccstring_t kickMessage) {
     Json::Value root;
     root["tag"]         = "ClientKickFromChannel";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -623,7 +632,7 @@ void ts3plugin_onClientKickFromServerEvent(uint64_t schandlerID,
                                            ccstring_t kickMessage) {
     Json::Value root;
     root["tag"]         = "ClientKickFromServer";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -635,7 +644,7 @@ void ts3plugin_onClientIDsEvent(uint64_t schandlerID,
                                 ccstring_t clientName) {
     Json::Value root;
     root["tag"]         = "ClientIDs";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -644,7 +653,7 @@ void ts3plugin_onClientIDsEvent(uint64_t schandlerID,
 void ts3plugin_onClientIDsFinishedEvent(uint64_t schandlerID) {
     Json::Value root;
     root["tag"]         = "ClientIDsFinished";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -656,7 +665,7 @@ void ts3plugin_onServerEditedEvent(uint64_t schandlerID,
                                    ccstring_t editorUID) {
     Json::Value root;
     root["tag"]         = "ServerEdited";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -665,7 +674,7 @@ void ts3plugin_onServerEditedEvent(uint64_t schandlerID,
 void ts3plugin_onServerUpdatedEvent(uint64_t schandlerID) {
     Json::Value root;
     root["tag"]         = "ServerUpdated";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -700,7 +709,7 @@ void ts3plugin_onServerStopEvent(uint64_t schandlerID,
                                  ccstring_t shutdownMessage) {
     Json::Value root;
     root["tag"]         = "ServerStop";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -720,7 +729,7 @@ int32_t ts3plugin_onTextMessageEvent(uint64_t schandlerID,
                                      int32_t ffIgnored) {
     Json::Value root;
     root["tag"]         = "TextMessage";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     root["targetMode"]  = targetMode;
     root["toID"]        = toID;
     root["fromID"]      = fromID;
@@ -739,7 +748,7 @@ void ts3plugin_onTalkStatusChangeEvent(uint64_t schandlerID,
                                        ident_t clientID) {
     Json::Value root;
     root["tag"]               = "TalkStatusChange";
-    root["schandlerID"]       = Json::Int64(schandlerID);
+    root["schandlerID"]       = Json::UInt64(schandlerID);
     root["status"]            = status;
     root["isReceivedWhisper"] = isReceivedWhisper;
     root["clientID"]          = clientID;
@@ -750,7 +759,7 @@ void ts3plugin_onTalkStatusChangeEvent(uint64_t schandlerID,
 void ts3plugin_onConnectionInfoEvent(uint64_t schandlerID, ident_t clientID) {
     Json::Value root;
     root["tag"]         = "ConnectionInfo";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     root["clientID"]    = clientID;
     rpc_server->send_event(root);
 }
@@ -759,7 +768,7 @@ void ts3plugin_onConnectionInfoEvent(uint64_t schandlerID, ident_t clientID) {
 void ts3plugin_onServerConnectionInfoEvent(uint64_t schandlerID) {
     Json::Value root;
     root["tag"]         = "ServerConnectionInfo";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     rpc_server->send_event(root);
 }
 
@@ -768,8 +777,8 @@ void ts3plugin_onChannelSubscribeEvent(uint64_t schandlerID,
                                        uint64_t channelID) {
     Json::Value root;
     root["tag"]         = "ChannelSubscribe";
-    root["schandlerID"] = Json::Int64(schandlerID);
-    root["channelID"]   = Json::Int64(channelID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
+    root["channelID"]   = Json::UInt64(channelID);
     rpc_server->send_event(root);
 }
 
@@ -777,7 +786,7 @@ void ts3plugin_onChannelSubscribeEvent(uint64_t schandlerID,
 void ts3plugin_onChannelSubscribeFinishedEvent(uint64_t schandlerID) {
     Json::Value root;
     root["tag"]         = "ChannelSubscribeFinished";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     rpc_server->send_event(root);
 }
 
@@ -786,8 +795,8 @@ void ts3plugin_onChannelUnsubscribeEvent(uint64_t schandlerID,
                                          uint64_t channelID) {
     Json::Value root;
     root["tag"]         = "ChannelUnsubscribe";
-    root["schandlerID"] = Json::Int64(schandlerID);
-    root["channelID"]   = Json::Int64(channelID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
+    root["channelID"]   = Json::UInt64(channelID);
     rpc_server->send_event(root);
 }
 
@@ -795,7 +804,7 @@ void ts3plugin_onChannelUnsubscribeEvent(uint64_t schandlerID,
 void ts3plugin_onChannelUnsubscribeFinishedEvent(uint64_t schandlerID) {
     Json::Value root;
     root["tag"]         = "ChannelUnsubscribeFinished";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     rpc_server->send_event(root);
 }
 
@@ -804,7 +813,8 @@ void ts3plugin_onChannelDescriptionUpdateEvent(uint64_t schandlerID,
                                                uint64_t channelID) {
     Json::Value root;
     root["tag"]         = "ChannelDescriptionUpdate";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
+    root["channelID"]   = Json::UInt64(channelID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -814,7 +824,8 @@ void ts3plugin_onChannelPasswordChangedEvent(uint64_t schandlerID,
                                              uint64_t channelID) {
     Json::Value root;
     root["tag"]         = "ChannelPasswordChanged";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
+    root["channelID"]   = Json::UInt64(channelID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -823,7 +834,7 @@ void ts3plugin_onChannelPasswordChangedEvent(uint64_t schandlerID,
 void ts3plugin_onPlaybackShutdownCompleteEvent(uint64_t schandlerID) {
     Json::Value root;
     root["tag"]         = "PlaybackShutdownComplete";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -845,7 +856,7 @@ void ts3plugin_onEditPlaybackVoiceDataEvent(uint64_t schandlerID,
                                             int32_t channels) {
     Json::Value root;
     root["tag"]         = "EditPlaybackVoiceData";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -860,7 +871,7 @@ void ts3plugin_onEditPostProcessVoiceDataEvent(uint64_t schandlerID,
                                                uint32_t* fillMask) {
     Json::Value root;
     root["tag"]         = "EditPostProcessVoiceData";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -874,7 +885,7 @@ void ts3plugin_onEditMixedPlaybackVoiceDataEvent(uint64_t schandlerID,
                                                  uint32_t *fillMask) {
     Json::Value root;
     root["tag"]         = "EditMixedPlaybackVoiceData";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -887,7 +898,7 @@ void ts3plugin_onEditCapturedVoiceDataEvent(uint64_t schandlerID,
                                             int32_t *edited) {
     Json::Value root;
     root["tag"]         = "EditCapturedVoiceData";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -899,7 +910,7 @@ void ts3plugin_onCustom3dRolloffCalculationClientEvent(uint64_t schandlerID,
                                                        float *volume) {
     Json::Value root;
     root["tag"]         = "Custom3dRolloffCalculationClient";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -911,7 +922,7 @@ void ts3plugin_onCustom3dRolloffCalculationWaveEvent(uint64_t schandlerID,
                                                      float *volume) {
     Json::Value root;
     root["tag"]         = "Custom3dRolloffCalculationWave";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -946,7 +957,7 @@ void ts3plugin_onClientBanFromServerEvent(uint64_t schandlerID,
                                           ccstring_t kickMessage) {
     Json::Value root;
     root["tag"]         = "ClientBanFromServer";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -960,7 +971,7 @@ int32_t ts3plugin_onClientPokeEvent(uint64_t schandlerID,
                                     int32_t ffIgnored) {
     Json::Value root;
     root["event"]        = "ClientPoke";
-    root["schandlerID"]  = Json::Int64(schandlerID);
+    root["schandlerID"]  = Json::UInt64(schandlerID);
     root["fromClientID"] = fromClientID;
     root["pokerName"]    = pokerName;
     root["pokerUID"]     = pokerUID;
@@ -977,7 +988,7 @@ void ts3plugin_onClientSelfVariableUpdateEvent(uint64_t schandlerID,
                                                ccstring_t newValue) {
     Json::Value root;
     root["tag"]         = "ClientSelfVariableUpdateEvent";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -994,7 +1005,8 @@ void ts3plugin_onFileListEvent(uint64_t schandlerID,
                                ccstring_t returnCode) {
     Json::Value root;
     root["tag"]         = "FileList";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
+    root["channelID"]   = Json::UInt64(channelID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1005,7 +1017,8 @@ void ts3plugin_onFileListFinishedEvent(uint64_t schandlerID,
                                        ccstring_t path) {
     Json::Value root;
     root["tag"]         = "FileListFinished";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
+    root["channelID"]   = Json::UInt64(channelID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1018,7 +1031,8 @@ void ts3plugin_onFileInfoEvent(uint64_t schandlerID,
                                uint64_t datetime) {
     Json::Value root;
     root["tag"]         = "FileInfo";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
+    root["channelID"]   = Json::UInt64(channelID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1032,7 +1046,7 @@ void ts3plugin_onServerGroupListEvent(uint64_t schandlerID,
                                       int32_t saveDB) {
     Json::Value root;
     root["tag"]         = "ServerGroupList";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1041,7 +1055,7 @@ void ts3plugin_onServerGroupListEvent(uint64_t schandlerID,
 void ts3plugin_onServerGroupListFinishedEvent(uint64_t schandlerID) {
     Json::Value root;
     root["tag"]         = "ServerGroupListFinished";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1053,7 +1067,7 @@ void ts3plugin_onServerGroupByClientIDEvent(uint64_t schandlerID,
                                             uint64_t clientDBID) {
     Json::Value root;
     root["tag"]         = "ServerGroupByClientID";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1067,7 +1081,7 @@ void ts3plugin_onServerGroupPermListEvent(uint64_t schandlerID,
                                           int32_t permissionSkip) {
     Json::Value root;
     root["tag"]         = "ServerGroupPermList";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1077,7 +1091,7 @@ void ts3plugin_onServerGroupPermListFinishedEvent(uint64_t schandlerID,
                                                   uint64_t serverGroupID) {
     Json::Value root;
     root["tag"]         = "ServerGroupPermListFinished";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1090,7 +1104,7 @@ void ts3plugin_onServerGroupClientListEvent(uint64_t schandlerID,
                                             ccstring_t clientUniqueID) {
     Json::Value root;
     root["tag"]         = "ServerGroupClientList";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1104,7 +1118,7 @@ void ts3plugin_onChannelGroupListEvent(uint64_t schandlerID,
                                        int32_t saveDB) {
     Json::Value root;
     root["tag"]         = "ChannelGroupList";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1113,7 +1127,7 @@ void ts3plugin_onChannelGroupListEvent(uint64_t schandlerID,
 void ts3plugin_onChannelGroupListFinishedEvent(uint64_t schandlerID) {
     Json::Value root;
     root["tag"]         = "ChannelGroupListFinished";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1127,7 +1141,7 @@ void ts3plugin_onChannelGroupPermListEvent(uint64_t schandlerID,
                                            int32_t permissionSkip) {
     Json::Value root;
     root["tag"]         = "ChannelGroupPermList";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1137,7 +1151,7 @@ void ts3plugin_onChannelGroupPermListFinishedEvent(uint64_t schandlerID,
                                                    uint64_t channelGroupID) {
     Json::Value root;
     root["tag"]         = "ChannelGroupPermListFinished";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1151,7 +1165,8 @@ void ts3plugin_onChannelPermListEvent(uint64_t schandlerID,
                                       int32_t permissionSkip) {
     Json::Value root;
     root["tag"]         = "ChannelPermList";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
+    root["channelID"]   = Json::UInt64(channelID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1161,7 +1176,8 @@ void ts3plugin_onChannelPermListFinishedEvent(uint64_t schandlerID,
                                               uint64_t channelID) {
     Json::Value root;
     root["tag"]         = "ChannelPermListFinished";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
+    root["channelID"]   = Json::UInt64(channelID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1175,7 +1191,7 @@ void ts3plugin_onClientPermListEvent(uint64_t schandlerID,
                                      int32_t permissionSkip) {
     Json::Value root;
     root["tag"]         = "ClientPermList";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1185,7 +1201,7 @@ void ts3plugin_onClientPermListFinishedEvent(uint64_t schandlerID,
                                              uint64_t clientDBID) {
     Json::Value root;
     root["tag"]         = "ClientPermListFinished";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1200,7 +1216,8 @@ void ts3plugin_onChannelClientPermListEvent(uint64_t schandlerID,
                                             int32_t permissionSkip) {
     Json::Value root;
     root["tag"]         = "ChannelClientPermList";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
+    root["channelID"]   = Json::UInt64(channelID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1211,7 +1228,8 @@ void ts3plugin_onChannelClientPermListFinishedEvent(uint64_t schandlerID,
                                                     uint64_t clientDBID) {
     Json::Value root;
     root["tag"]         = "ChannelClientPermListFinished";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
+    root["channelID"]   = Json::UInt64(channelID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1226,7 +1244,8 @@ void ts3plugin_onClientChannelGroupChangedEvent(uint64_t schandlerID,
                                                 ccstring_t invokerUID) {
     Json::Value root;
     root["tag"]         = "ClientChannelGroupChanged";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
+    root["channelID"]   = Json::UInt64(channelID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1239,7 +1258,7 @@ int32_t ts3plugin_onServerPermissionErrorEvent(uint64_t schandlerID,
                                                uint32_t failedPermissionID) {
     Json::Value root;
     root["tag"]         = "ServerPermissionError";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
     return 0; // See onServerErrorEvent for return code description
@@ -1250,7 +1269,7 @@ void ts3plugin_onPermissionListGroupEndIDEvent(uint64_t schandlerID,
                                                uint32_t groupEndID) {
     Json::Value root;
     root["tag"]         = "PermissionListGroupEndID";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1262,7 +1281,7 @@ void ts3plugin_onPermissionListEvent(uint64_t schandlerID,
                                      ccstring_t permissionDescription) {
     Json::Value root;
     root["tag"]         = "PermissionList";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1271,7 +1290,7 @@ void ts3plugin_onPermissionListEvent(uint64_t schandlerID,
 void ts3plugin_onPermissionListFinishedEvent(uint64_t schandlerID) {
     Json::Value root;
     root["tag"]         = "PermissionListFinished";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1289,7 +1308,8 @@ void ts3plugin_onPermissionOverviewEvent(uint64_t schandlerID,
                                          int32_t permissionSkip) {
     Json::Value root;
     root["tag"]         = "PermissionOverview";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
+    root["channelID"]   = Json::UInt64(channelID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1298,7 +1318,7 @@ void ts3plugin_onPermissionOverviewEvent(uint64_t schandlerID,
 void ts3plugin_onPermissionOverviewFinishedEvent(uint64_t schandlerID) {
     Json::Value root;
     root["tag"]         = "PermissionOverviewFinished";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1314,7 +1334,7 @@ void ts3plugin_onServerGroupClientAddedEvent(uint64_t schandlerID,
                                              ccstring_t invokerUID) {
     Json::Value root;
     root["tag"]         = "ServerGroupClientAddedEvent";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1330,7 +1350,7 @@ void ts3plugin_onServerGroupClientDeletedEvent(uint64_t schandlerID,
                                                ccstring_t invokerUID) {
     Json::Value root;
     root["tag"]         = "ServerGroupClientDeleted";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1341,7 +1361,7 @@ void ts3plugin_onClientNeededPermissionsEvent(uint64_t schandlerID,
                                               int32_t permissionValue) {
     Json::Value root;
     root["tag"]         = "ClientNeededPermissions";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1350,7 +1370,7 @@ void ts3plugin_onClientNeededPermissionsEvent(uint64_t schandlerID,
 void ts3plugin_onClientNeededPermissionsFinishedEvent(uint64_t schandlerID) {
     Json::Value root;
     root["tag"]         = "ClientNeededPermissionsFinished";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1363,7 +1383,7 @@ void ts3plugin_onFileTransferStatusEvent(ident_t transferID,
                                          uint64_t schandlerID) {
     Json::Value root;
     root["tag"]         = "FileTransferStatus";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1374,7 +1394,7 @@ void ts3plugin_onClientChatClosedEvent(uint64_t schandlerID,
                                        ccstring_t clientUID) {
     Json::Value root;
     root["tag"]         = "ClientChatClosed";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1385,7 +1405,7 @@ void ts3plugin_onClientChatComposingEvent(uint64_t schandlerID,
                                           ccstring_t clientUID) {
     Json::Value root;
     root["tag"]         = "ClientChatComposing";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1394,7 +1414,7 @@ void ts3plugin_onClientChatComposingEvent(uint64_t schandlerID,
 void ts3plugin_onServerLogEvent(uint64_t schandlerID, ccstring_t logMsg) {
     Json::Value root;
     root["tag"]         = "ServerLog";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1405,7 +1425,7 @@ void ts3plugin_onServerLogFinishedEvent(uint64_t schandlerID,
                                         uint64_t fileSize) {
     Json::Value root;
     root["tag"]         = "ServerLogFinished";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1419,7 +1439,7 @@ void ts3plugin_onMessageListEvent(uint64_t schandlerID,
                                   int32_t flagRead) {
     Json::Value root;
     root["tag"]         = "MessageList";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1433,7 +1453,7 @@ void ts3plugin_onMessageGetEvent(uint64_t schandlerID,
                                  uint64_t timestamp) {
     Json::Value root;
     root["tag"]         = "MessageGet";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1444,7 +1464,7 @@ void ts3plugin_onClientDBIDfromUIDEvent(uint64_t schandlerID,
                                         uint64_t clientDBID) {
     Json::Value root;
     root["tag"]         = "ClientDBIDFromUID";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1456,7 +1476,7 @@ void ts3plugin_onClientNamefromUIDEvent(uint64_t schandlerID,
                                         ccstring_t clientNickName) {
     Json::Value root;
     root["tag"]         = "ClientNameFromUID";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1468,7 +1488,7 @@ void ts3plugin_onClientNamefromDBIDEvent(uint64_t schandlerID,
                                          ccstring_t clientNickName) {
     Json::Value root;
     root["tag"]         = "ClientNameFromDBID";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1483,7 +1503,7 @@ void ts3plugin_onComplainListEvent(uint64_t schandlerID,
                                    uint64_t timestamp) {
     Json::Value root;
     root["tag"]         = "ComplainList";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1504,7 +1524,7 @@ void ts3plugin_onBanListEvent(uint64_t schandlerID,
                               ccstring_t lastNickName) {
     Json::Value root;
     root["tag"]         = "BanList";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1514,7 +1534,7 @@ void ts3plugin_onClientServerQueryLoginPasswordEvent(uint64_t schandlerID,
                                                      ccstring_t password) {
     Json::Value root;
     root["tag"]         = "ClientServerQueryLoginPassword";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1532,7 +1552,7 @@ void ts3plugin_onIncomingClientQueryEvent(uint64_t schandlerID,
                                           ccstring_t commandText) {
     Json::Value root;
     root["tag"]         = "IncomingClientQuery";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1549,7 +1569,7 @@ void ts3plugin_onServerTemporaryPasswordListEvent(uint64_t schandlerID,
                                                   ccstring_t targetChannelPW) {
     Json::Value root;
     root["tag"]         = "ServerTemporaryPasswordList";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1588,7 +1608,7 @@ void ts3plugin_onMenuItemEvent(uint64_t schandlerID,
                                uint64_t selectedItemID) {
     Json::Value root;
     root["tag"]         = "MenuItem";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
@@ -1618,7 +1638,7 @@ void ts3plugin_onClientDisplayNameChanged(uint64_t schandlerID,
                                           ccstring_t clientUID) {
     Json::Value root;
     root["tag"]         = "ClientDisplayNameChanged";
-    root["schandlerID"] = Json::Int64(schandlerID);
+    root["schandlerID"] = Json::UInt64(schandlerID);
     // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
