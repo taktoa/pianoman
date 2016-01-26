@@ -433,14 +433,14 @@ void ts3plugin_initHotkeys(struct PluginHotkey ***hotkeys) {
 // -- TeamSpeak ClientLib callbacks --------------------------------------------
 // -----------------------------------------------------------------------------
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onConnectStatusChangeEvent(uint64_t schandlerID,
                                           int32_t newStatus,
                                           uint32_t errorNumber) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onNewChannelEvent(uint64_t schandlerID,
                                  uint64_t channelID,
                                  uint64_t channelParentID) {
@@ -452,7 +452,7 @@ void ts3plugin_onNewChannelEvent(uint64_t schandlerID,
     rpc_server->send_event(root);
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onNewChannelCreatedEvent(uint64_t schandlerID,
                                         uint64_t channelID,
                                         uint64_t channelParentID,
@@ -470,7 +470,7 @@ void ts3plugin_onNewChannelCreatedEvent(uint64_t schandlerID,
     rpc_server->send_event(root);
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onDelChannelEvent(uint64_t schandlerID,
                                  uint64_t channelID,
                                  ident_t invokerID,
@@ -479,7 +479,7 @@ void ts3plugin_onDelChannelEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onChannelMoveEvent(uint64_t schandlerID,
                                   uint64_t channelID,
                                   uint64_t newChannelParentID,
@@ -489,12 +489,12 @@ void ts3plugin_onChannelMoveEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onUpdateChannelEvent(uint64_t schandlerID, uint64_t channelID) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onUpdateChannelEditedEvent(uint64_t schandlerID,
                                           uint64_t channelID,
                                           ident_t invokerID,
@@ -503,7 +503,7 @@ void ts3plugin_onUpdateChannelEditedEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onUpdateClientEvent(uint64_t schandlerID,
                                    ident_t clientID,
                                    ident_t invokerID,
@@ -512,7 +512,7 @@ void ts3plugin_onUpdateClientEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onClientMoveEvent(uint64_t schandlerID,
                                  ident_t clientID,
                                  uint64_t oldChannelID,
@@ -522,7 +522,7 @@ void ts3plugin_onClientMoveEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onClientMoveSubscriptionEvent(uint64_t schandlerID,
                                              ident_t clientID,
                                              uint64_t oldChannelID,
@@ -531,7 +531,7 @@ void ts3plugin_onClientMoveSubscriptionEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onClientMoveTimeoutEvent(uint64_t schandlerID,
                                         ident_t clientID,
                                         uint64_t oldChannelID,
@@ -541,7 +541,7 @@ void ts3plugin_onClientMoveTimeoutEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onClientMoveMovedEvent(uint64_t schandlerID,
                                       ident_t clientID,
                                       uint64_t oldChannelID,
@@ -554,7 +554,7 @@ void ts3plugin_onClientMoveMovedEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onClientKickFromChannelEvent(uint64_t schandlerID,
                                             ident_t clientID,
                                             uint64_t oldChannelID,
@@ -567,7 +567,7 @@ void ts3plugin_onClientKickFromChannelEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onClientKickFromServerEvent(uint64_t schandlerID,
                                            ident_t clientID,
                                            uint64_t oldChannelID,
@@ -580,7 +580,7 @@ void ts3plugin_onClientKickFromServerEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onClientIDsEvent(uint64_t schandlerID,
                                 ccstring_t clientUID,
                                 ident_t clientID,
@@ -588,12 +588,12 @@ void ts3plugin_onClientIDsEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onClientIDsFinishedEvent(uint64_t schandlerID) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onServerEditedEvent(uint64_t schandlerID,
                                    ident_t editorID,
                                    ccstring_t editorName,
@@ -601,12 +601,12 @@ void ts3plugin_onServerEditedEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onServerUpdatedEvent(uint64_t schandlerID) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 int32_t ts3plugin_onServerErrorEvent(uint64_t schandlerID,
                                      ccstring_t errorMessage,
                                      uint32_t error,
@@ -631,7 +631,7 @@ int32_t ts3plugin_onServerErrorEvent(uint64_t schandlerID,
                  function is ignored */
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onServerStopEvent(uint64_t schandlerID,
                                  ccstring_t shutdownMessage) {
     // FIXME: implement
@@ -663,7 +663,7 @@ int32_t ts3plugin_onTextMessageEvent(uint64_t schandlerID,
     return 0;
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onTalkStatusChangeEvent(uint64_t schandlerID,
                                        int32_t status,
                                        int32_t isReceivedWhisper,
@@ -687,62 +687,62 @@ void ts3plugin_onTalkStatusChangeEvent(uint64_t schandlerID,
     }
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onConnectionInfoEvent(uint64_t schandlerID, ident_t clientID) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onServerConnectionInfoEvent(uint64_t schandlerID) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onChannelSubscribeEvent(uint64_t schandlerID,
                                        uint64_t channelID) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onChannelSubscribeFinishedEvent(uint64_t schandlerID) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onChannelUnsubscribeEvent(uint64_t schandlerID,
                                          uint64_t channelID) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onChannelUnsubscribeFinishedEvent(uint64_t schandlerID) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onChannelDescriptionUpdateEvent(uint64_t schandlerID,
                                                uint64_t channelID) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onChannelPasswordChangedEvent(uint64_t schandlerID,
                                              uint64_t channelID) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onPlaybackShutdownCompleteEvent(uint64_t schandlerID) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onSoundDeviceListChangedEvent(ccstring_t modeID,
                                              int32_t playOrCap) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onEditPlaybackVoiceDataEvent(uint64_t schandlerID,
                                             ident_t clientID,
                                             short *samples,
@@ -751,7 +751,7 @@ void ts3plugin_onEditPlaybackVoiceDataEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onEditPostProcessVoiceDataEvent(uint64_t schandlerID,
                                                ident_t clientID,
                                                short *samples,
@@ -762,7 +762,7 @@ void ts3plugin_onEditPostProcessVoiceDataEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onEditMixedPlaybackVoiceDataEvent(uint64_t schandlerID,
                                                  short *samples,
                                                  int32_t sampleCount,
@@ -772,7 +772,7 @@ void ts3plugin_onEditMixedPlaybackVoiceDataEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onEditCapturedVoiceDataEvent(uint64_t schandlerID,
                                             short *samples,
                                             int32_t sampleCount,
@@ -781,7 +781,7 @@ void ts3plugin_onEditCapturedVoiceDataEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onCustom3dRolloffCalculationClientEvent(uint64_t schandlerID,
                                                        ident_t clientID,
                                                        float distance,
@@ -789,7 +789,7 @@ void ts3plugin_onCustom3dRolloffCalculationClientEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onCustom3dRolloffCalculationWaveEvent(uint64_t schandlerID,
                                                      uint64_t waveHandle,
                                                      float distance,
@@ -797,7 +797,7 @@ void ts3plugin_onCustom3dRolloffCalculationWaveEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onUserLoggingMessageEvent(ccstring_t logMessage,
                                          int32_t logLevel,
                                          ccstring_t logChannel,
@@ -811,7 +811,7 @@ void ts3plugin_onUserLoggingMessageEvent(ccstring_t logMessage,
 // -- TeamSpeak ClientLib rare callbacks ---------------------------------------
 // -----------------------------------------------------------------------------
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onClientBanFromServerEvent(uint64_t schandlerID,
                                           ident_t clientID,
                                           uint64_t oldChannelID,
@@ -825,7 +825,7 @@ void ts3plugin_onClientBanFromServerEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 int32_t ts3plugin_onClientPokeEvent(uint64_t schandlerID,
                                     ident_t fromClientID,
                                     ccstring_t pokerName,
@@ -842,7 +842,7 @@ int32_t ts3plugin_onClientPokeEvent(uint64_t schandlerID,
     return 0; // 0 = handle normally, 1 = client will ignore the poke
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onClientSelfVariableUpdateEvent(uint64_t schandlerID,
                                                int32_t flag,
                                                ccstring_t oldValue,
@@ -850,7 +850,7 @@ void ts3plugin_onClientSelfVariableUpdateEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onFileListEvent(uint64_t schandlerID,
                                uint64_t channelID,
                                ccstring_t path,
@@ -863,14 +863,14 @@ void ts3plugin_onFileListEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onFileListFinishedEvent(uint64_t schandlerID,
                                        uint64_t channelID,
                                        ccstring_t path) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onFileInfoEvent(uint64_t schandlerID,
                                uint64_t channelID,
                                ccstring_t name,
@@ -879,7 +879,7 @@ void ts3plugin_onFileInfoEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onServerGroupListEvent(uint64_t schandlerID,
                                       uint64_t serverGroupID,
                                       ccstring_t name,
@@ -889,12 +889,12 @@ void ts3plugin_onServerGroupListEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onServerGroupListFinishedEvent(uint64_t schandlerID) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onServerGroupByClientIDEvent(uint64_t schandlerID,
                                             ccstring_t name,
                                             uint64_t serverGroupList,
@@ -902,7 +902,7 @@ void ts3plugin_onServerGroupByClientIDEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onServerGroupPermListEvent(uint64_t schandlerID,
                                           uint64_t serverGroupID,
                                           uint32_t permissionID,
@@ -912,13 +912,13 @@ void ts3plugin_onServerGroupPermListEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onServerGroupPermListFinishedEvent(uint64_t schandlerID,
                                                   uint64_t serverGroupID) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onServerGroupClientListEvent(uint64_t schandlerID,
                                             uint64_t serverGroupID,
                                             uint64_t clientDBID,
@@ -927,7 +927,7 @@ void ts3plugin_onServerGroupClientListEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onChannelGroupListEvent(uint64_t schandlerID,
                                        uint64_t channelGroupID,
                                        ccstring_t name,
@@ -937,12 +937,12 @@ void ts3plugin_onChannelGroupListEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onChannelGroupListFinishedEvent(uint64_t schandlerID) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onChannelGroupPermListEvent(uint64_t schandlerID,
                                            uint64_t channelGroupID,
                                            uint32_t permissionID,
@@ -952,13 +952,13 @@ void ts3plugin_onChannelGroupPermListEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onChannelGroupPermListFinishedEvent(uint64_t schandlerID,
                                                    uint64_t channelGroupID) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onChannelPermListEvent(uint64_t schandlerID,
                                       uint64_t channelID,
                                       uint32_t permissionID,
@@ -968,13 +968,13 @@ void ts3plugin_onChannelPermListEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onChannelPermListFinishedEvent(uint64_t schandlerID,
                                               uint64_t channelID) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onClientPermListEvent(uint64_t schandlerID,
                                      uint64_t clientDBID,
                                      uint32_t permissionID,
@@ -984,13 +984,13 @@ void ts3plugin_onClientPermListEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onClientPermListFinishedEvent(uint64_t schandlerID,
                                              uint64_t clientDBID) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onChannelClientPermListEvent(uint64_t schandlerID,
                                             uint64_t channelID,
                                             uint64_t clientDBID,
@@ -1001,14 +1001,14 @@ void ts3plugin_onChannelClientPermListEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onChannelClientPermListFinishedEvent(uint64_t schandlerID,
                                                     uint64_t channelID,
                                                     uint64_t clientDBID) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onClientChannelGroupChangedEvent(uint64_t schandlerID,
                                                 uint64_t channelGroupID,
                                                 uint64_t channelID,
@@ -1019,7 +1019,7 @@ void ts3plugin_onClientChannelGroupChangedEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 int32_t ts3plugin_onServerPermissionErrorEvent(uint64_t schandlerID,
                                                ccstring_t errorMessage,
                                                uint32_t error,
@@ -1028,13 +1028,13 @@ int32_t ts3plugin_onServerPermissionErrorEvent(uint64_t schandlerID,
     return 0; // See onServerErrorEvent for return code description
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onPermissionListGroupEndIDEvent(uint64_t schandlerID,
                                                uint32_t groupEndID) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onPermissionListEvent(uint64_t schandlerID,
                                      uint32_t permissionID,
                                      ccstring_t permissionName,
@@ -1042,12 +1042,12 @@ void ts3plugin_onPermissionListEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onPermissionListFinishedEvent(uint64_t schandlerID) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onPermissionOverviewEvent(uint64_t schandlerID,
                                          uint64_t clientDBID,
                                          uint64_t channelID,
@@ -1061,12 +1061,12 @@ void ts3plugin_onPermissionOverviewEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onPermissionOverviewFinishedEvent(uint64_t schandlerID) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onServerGroupClientAddedEvent(uint64_t schandlerID,
                                              ident_t clientID,
                                              ccstring_t clientName,
@@ -1078,7 +1078,7 @@ void ts3plugin_onServerGroupClientAddedEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onServerGroupClientDeletedEvent(uint64_t schandlerID,
                                                ident_t clientID,
                                                ccstring_t clientName,
@@ -1090,19 +1090,19 @@ void ts3plugin_onServerGroupClientDeletedEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onClientNeededPermissionsEvent(uint64_t schandlerID,
                                               uint32_t permissionID,
                                               int32_t permissionValue) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onClientNeededPermissionsFinishedEvent(uint64_t schandlerID) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onFileTransferStatusEvent(ident_t transferID,
                                          uint32_t status,
                                          ccstring_t statusMessage,
@@ -1111,33 +1111,33 @@ void ts3plugin_onFileTransferStatusEvent(ident_t transferID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onClientChatClosedEvent(uint64_t schandlerID,
                                        ident_t clientID,
                                        ccstring_t clientUID) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onClientChatComposingEvent(uint64_t schandlerID,
                                           ident_t clientID,
                                           ccstring_t clientUID) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onServerLogEvent(uint64_t schandlerID, ccstring_t logMsg) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onServerLogFinishedEvent(uint64_t schandlerID,
                                         uint64_t lastPos,
                                         uint64_t fileSize) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onMessageListEvent(uint64_t schandlerID,
                                   uint64_t messageID,
                                   ccstring_t fromClientUID,
@@ -1147,7 +1147,7 @@ void ts3plugin_onMessageListEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onMessageGetEvent(uint64_t schandlerID,
                                  uint64_t messageID,
                                  ccstring_t fromClientUID,
@@ -1157,14 +1157,14 @@ void ts3plugin_onMessageGetEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onClientDBIDfromUIDEvent(uint64_t schandlerID,
                                         ccstring_t clientUID,
                                         uint64_t clientDBID) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onClientNamefromUIDEvent(uint64_t schandlerID,
                                         ccstring_t clientUID,
                                         uint64_t clientDBID,
@@ -1172,7 +1172,7 @@ void ts3plugin_onClientNamefromUIDEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onClientNamefromDBIDEvent(uint64_t schandlerID,
                                          ccstring_t clientUID,
                                          uint64_t clientDBID,
@@ -1180,7 +1180,7 @@ void ts3plugin_onClientNamefromDBIDEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onComplainListEvent(uint64_t schandlerID,
                                    uint64_t targetClientDBID,
                                    ccstring_t targetClientNickName,
@@ -1191,7 +1191,7 @@ void ts3plugin_onComplainListEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onBanListEvent(uint64_t schandlerID,
                               uint64_t banID,
                               ccstring_t ip,
@@ -1208,13 +1208,13 @@ void ts3plugin_onBanListEvent(uint64_t schandlerID,
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onClientServerQueryLoginPasswordEvent(uint64_t schandlerID,
                                                      ccstring_t password) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onPluginCommandEvent(uint64_t schandlerID,
                                     ccstring_t pluginName,
                                     ccstring_t pluginCommand) {
@@ -1222,13 +1222,13 @@ void ts3plugin_onPluginCommandEvent(uint64_t schandlerID,
     printf("ON PLUGIN COMMAND: %s %s\n", pluginName, pluginCommand);
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onIncomingClientQueryEvent(uint64_t schandlerID,
                                           ccstring_t commandText) {
     // FIXME: implement
 }
 
-//! FIXME: docstring
+//! FIXME: doc
 void ts3plugin_onServerTemporaryPasswordListEvent(uint64_t schandlerID,
                                                   ccstring_t clientNickname,
                                                   ccstring_t clientUID,
