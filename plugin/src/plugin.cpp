@@ -875,11 +875,12 @@ void ts3plugin_onEditPlaybackVoiceDataEvent(uint64_t schandlerID,
                                             short* samples,
                                             int32_t sampleCount,
                                             int32_t channels) {
-    Json::Value root;
-    root["tag"]         = "EditPlaybackVoiceData";
-    root["schandlerID"] = Json::UInt64(schandlerID);
-    // FIXME: add rest of key-value pairs
-    rpc_server->send_event(root);
+    //~ Json::Value root;
+    //~ root["tag"]         = "EditPlaybackVoiceData";
+    //~ root["schandlerID"] = Json::UInt64(schandlerID);
+    //~ // FIXME: add rest of key-value pairs
+    //~ // FIXME: must use req-rep, not publisher
+    //~ rpc_server->send_event(root);
 }
 
 //! FIXME: doc
@@ -890,11 +891,12 @@ void ts3plugin_onEditPostProcessVoiceDataEvent(uint64_t schandlerID,
                                                int32_t channels,
                                                const uint32_t* speakers,
                                                uint32_t* fillMask) {
-    Json::Value root;
-    root["tag"]         = "EditPostProcessVoiceData";
-    root["schandlerID"] = Json::UInt64(schandlerID);
-    // FIXME: add rest of key-value pairs
-    rpc_server->send_event(root);
+    //~ Json::Value root;
+    //~ root["tag"]         = "EditPostProcessVoiceData";
+    //~ root["schandlerID"] = Json::UInt64(schandlerID);
+    //~ // FIXME: add rest of key-value pairs
+    //~ // FIXME: must use req-rep, not publisher
+    //~ rpc_server->send_event(root);
 }
 
 //! FIXME: doc
@@ -904,12 +906,12 @@ void ts3plugin_onEditMixedPlaybackVoiceDataEvent(uint64_t schandlerID,
                                                  int32_t channels,
                                                  const uint32_t *speakers,
                                                  uint32_t *fillMask) {
-    Json::Value root;
-    root["tag"]         = "EditMixedPlaybackVoiceData";
-    root["schandlerID"] = Json::UInt64(schandlerID);
-    // FIXME: add rest of key-value pairs
-    // FIXME: must use req-rep, not publisher
-    //rpc_server->send_event(root);
+    //~ Json::Value root;
+    //~ root["tag"]         = "EditMixedPlaybackVoiceData";
+    //~ root["schandlerID"] = Json::UInt64(schandlerID);
+    //~ // FIXME: add rest of key-value pairs
+    //~ // FIXME: must use req-rep, not publisher
+    //~ //rpc_server->send_event(root);
 }
 
 //! FIXME: doc
@@ -918,12 +920,13 @@ void ts3plugin_onEditCapturedVoiceDataEvent(uint64_t schandlerID,
                                             int32_t sampleCount,
                                             int32_t channels,
                                             int32_t *edited) {
-    Json::Value root;
-    root["tag"]         = "EditCapturedVoiceData";
-    root["schandlerID"] = Json::UInt64(schandlerID);
-    // FIXME: add rest of key-value pairs
-    // FIXME: must use req-rep, not publisher
-    //rpc_server->send_event(root);
+
+    //~ Json::Value root;
+    //~ root["tag"]         = "EditCapturedVoiceData";
+    //~ root["schandlerID"] = Json::UInt64(schandlerID);
+    //~ // FIXME: add rest of key-value pairs
+    //~ // FIXME: must use req-rep, not publisher
+    //~ //rpc_server->send_event(root);
 }
 
 //! FIXME: doc
@@ -931,11 +934,12 @@ void ts3plugin_onCustom3dRolloffCalculationClientEvent(uint64_t schandlerID,
                                                        ident_t clientID,
                                                        float distance,
                                                        float *volume) {
-    Json::Value root;
-    root["tag"]         = "Custom3dRolloffCalculationClient";
-    root["schandlerID"] = Json::UInt64(schandlerID);
-    // FIXME: add rest of key-value pairs
-    rpc_server->send_event(root);
+    //~ Json::Value root;
+    //~ root["tag"]         = "Custom3dRolloffCalculationClient";
+    //~ root["schandlerID"] = Json::UInt64(schandlerID);
+    //~ // FIXME: add rest of key-value pairs
+    //~ // FIXME: must use req-rep, not publisher
+    //~ rpc_server->send_event(root);
 }
 
 //! FIXME: doc
@@ -943,11 +947,12 @@ void ts3plugin_onCustom3dRolloffCalculationWaveEvent(uint64_t schandlerID,
                                                      uint64_t waveHandle,
                                                      float distance,
                                                      float *volume) {
-    Json::Value root;
-    root["tag"]         = "Custom3dRolloffCalculationWave";
-    root["schandlerID"] = Json::UInt64(schandlerID);
-    // FIXME: add rest of key-value pairs
-    rpc_server->send_event(root);
+    //~ Json::Value root;
+    //~ root["tag"]         = "Custom3dRolloffCalculationWave";
+    //~ root["schandlerID"] = Json::UInt64(schandlerID);
+    //~ // FIXME: add rest of key-value pairs
+    //~ // FIXME: must use req-rep, not publisher
+    //~ rpc_server->send_event(root);
 }
 
 //! FIXME: doc
