@@ -44,12 +44,12 @@
 // -- Type definitions ---------------------------------------------------------
 // -----------------------------------------------------------------------------
 
-typedef char*                  mcstring_t;
-typedef const char*            ccstring_t;
-typedef enum PluginMenuType    menu_type_t;
+typedef char*                 mcstring_t;
+typedef const char*           ccstring_t;
+typedef enum PluginMenuType   menu_type_t;
 typedef struct PluginMenuItem menu_item_t;
-typedef struct PluginHotkey    hotkey_t;
-typedef anyID                  ident_t;
+typedef struct PluginHotkey   hotkey_t;
+typedef anyID                 ident_t;
 
 typedef enum log_level_t {
     LL_DEBUG = 0,
