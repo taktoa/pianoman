@@ -51,12 +51,12 @@ typedef struct PluginMenuItem menu_item_t;
 typedef struct PluginHotkey    hotkey_t;
 typedef anyID                  ident_t;
 
-typedef enum loglevel {
-    Debug = 0,
-    Info,
-    Warning,
-    Error
-} loglevel_t;
+typedef enum log_level_t {
+    LL_DEBUG = 0,
+    LL_INFO,
+    LL_WARNING,
+    LL_ERROR
+} log_level_t;
 
 // -----------------------------------------------------------------------------
 // -- Global variables ---------------------------------------------------------
@@ -71,37 +71,37 @@ rpc::server_handle_t *rpc_server = NULL;
 // -----------------------------------------------------------------------------
 
 //! Helper function for logging.
-void pluginLog(loglevel_t level, std::string message) {
+void pluginLog(log_level_t level, std::string message) {
     std::string pluginLogPrefix = "ZeroMQ";
     std::cerr << pluginLogPrefix << ": [";
     switch (level) {
-    case Debug:
-        std::cerr << "DEBUG"; 
+    case LL_DEBUG:
+        std::cerr << "DEBUG";
         break;
-    case Info:
+    case LL_INFO:
         std::cerr << termcolor::blue << "INFO";
         break;
-    case Warning:
+    case LL_WARNING:
         std::cerr << termcolor::yellow << "WARNING";
         break;
-    case Error:
+    case LL_ERROR:
         std::cerr << termcolor::red << "ERROR";
         break;
     }
     std::cerr << termcolor::reset << "]" << " " << message << std::endl;
 }
 
-//! Call pluginLog with level DEBUG.
-void pluginLog_DEBUG(std::string message) { pluginLog(Debug, message); }
+//! Call pluginLog with level LL_DEBUG.
+void pluginLog_DEBUG(std::string message) { pluginLog(LL_DEBUG, message); }
 
-//! Call pluginLog with level INFO.
-void pluginLog_INFO(std::string message) { pluginLog(Info, message); }
+//! Call pluginLog with level LL_INFO.
+void pluginLog_INFO(std::string message) { pluginLog(LL_INFO, message); }
 
-//! Call pluginLog with level WARNING.
-void pluginLog_WARNING(std::string message) { pluginLog(Warning, message); }
+//! Call pluginLog with level LL_WARNING.
+void pluginLog_WARNING(std::string message) { pluginLog(LL_WARNING, message); }
 
-//! Call pluginLog with level ERROR.
-void pluginLog_ERROR(std::string message) { pluginLog(Error, message); }
+//! Call pluginLog with level LL_ERROR.
+void pluginLog_ERROR(std::string message) { pluginLog(LL_ERROR, message); }
 
 // -----------------------------------------------------------------------------
 // -- Required functions -------------------------------------------------------
