@@ -1,17 +1,12 @@
 #include <iostream>
 
-#include <boost/chrono/duration.hpp>
 #include "rpc.hpp"
 
 #include <QGuiApplication>
 #include <QWindow>
-
-#include <array>
-#include <boost/asio.hpp>
-//#include <zmq.hpp>
+#include <QSocketNotifier>
 
 using namespace std;
-using namespace boost;
 
 static void shutdown_teamspeak() {
     QWindowList windows = QGuiApplication::topLevelWindows();
@@ -23,9 +18,15 @@ static void shutdown_teamspeak() {
 }
 
 namespace rpc {
-    server_handle_t::server_handle_t(): publisher(ios), request_server(ios) {
-        shutdown = true;
+    server_handle_t::server_handle_t(): context(1), publisher(context,ZMQ_PUB),
+        request_server(context,ZMQ_REP) {
         cout << "made " << this << endl;
+        int zmq_fd = 0;
+        size_t zmq_fd_size = sizeof(zmq_fd);
+        request_server.getsockopt(ZMQ_FD,&zmq_fd,&zmq_fd_size);
+        socket_notifier = new QSocketNotifier(zmq_fd,QSocketNotifier::Read,this);
+        connect(socket_notifier,SIGNAL(activated(int)),this,SLOT(socket_ready(int)));
+        cout << "hooked zmq fd" << zmq_fd << endl;
     }
 
     vector<uint8_t> event_t::serialize() const {
@@ -44,53 +45,37 @@ namespace rpc {
         string text = fw.write(root);
         vector<uint8_t> binary(text.begin(), text.end());
         cout << "sending '" << text << "'" << endl;
-        publisher.send(asio::buffer(binary));
+        zmq::message_t message(binary.size());
+        memcpy(message.data(),binary.data(),binary.size());
+        publisher.send(message);
     }
 
     void server_handle_t::start_server() {
-        shutdown = false;
         publisher.bind("ipc://teamspeak.pub");
         request_server.bind("ipc://teamspeak.rep");
-
-        //server_thread = thread(boost::bind(&boost::asio::io_service::run, &ios));
-
-        server_thread = thread(boost::ref(*this));
     }
 
     void server_handle_t::shutdown_server() {
         cout << "stopping" << this << endl;
-        shutdown = true;
-        ios.stop();
-        cout << "a" << endl;
-        server_thread.interrupt();
-        cout << "a" << endl;
-        server_thread.join();
-        cout << "a" << endl;
     }
-    void server_handle_t::operator()() {
-        cout << "in thread " << this << endl;
-        //boost::chrono::duration<int> sleep_interval(1);
-        
+    void server_handle_t::socket_ready(int socket) {
+        uint32_t poll_state;
+        size_t poll_state_size = sizeof(poll_state);
         while (true) {
-            //cout << "tick" << endl;
-            ios.run();
-        std::array<char, 256> buf;
-        std::array<boost::asio::mutable_buffer,1> rcv_bufs = {{ boost::asio::buffer(buf) }};
-        request_server.async_receive(rcv_bufs,
-          [&](boost::system::error_code const& ec, size_t bytes_transfered) {
-            string x = string(buf.data(),bytes_transfered);
-            if (x == "die") {
-                ios.stop();
-                shutdown_teamspeak();
-                return;
+            request_server.getsockopt(ZMQ_EVENTS,&poll_state,&poll_state_size);
+            cout << "state" << poll_state << endl;
+            if (!(poll_state && ZMQ_POLLIN)) break;
+            zmq::message_t msg;
+            if (request_server.recv(&msg,ZMQ_NOBLOCK)) {
+                string x = string((const char *)msg.data(),msg.size());
+                if (x == "die") {
+                    shutdown_teamspeak();
+                    return;
+                }
+                cout << "got packet" << x << endl;
+                zmq::message_t reply(0);
+                request_server.send(reply);
             }
-            cout << "got packet" << x << endl;
-            std::array<char,0> reply;
-            request_server.send(asio::buffer(reply));
-        });
-            //cout << "tock" << endl;
-            if (shutdown) break;
         }
-        cout << "quiting thread" << endl;
     }
 }
