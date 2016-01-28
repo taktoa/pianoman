@@ -11,6 +11,10 @@ pkg_check_modules(MSG     REQUIRED msgpack)
 pkg_check_modules(QT5     REQUIRED Qt5Gui)
 pkg_check_modules(JSONCPP REQUIRED jsoncpp)
 
+set(CMAKE_AUTOMOC ON)
+
+find_package(Qt5Gui)
+
 set(CMAKE_C_FLAGS
   "${CMAKE_C_FLAGS} -g -std=c11 -Werror")
 set(CMAKE_CXX_FLAGS
@@ -35,7 +39,7 @@ add_definitions(
   ${MSG_CFLAGS_OTHER})
 
 set(GENERAL_LIBRARIES
-  ${Boost_LIBRARIES} boost_regex
+  ${Boost_LIBRARIES}
   ${ZMQ_LIBRARIES}
   ${QT5_LIBRARIES}
   ${JSONCPP_LIBRARIES})

@@ -1,7 +1,7 @@
 # Build dependencies
 { clangStdenv, cmake, pkgconfig, doxygen, ninja
 # Program dependencies
-, boost, zeromq, libmsgpack, azmq
+, boost, zeromq, libmsgpack
 # Misc dependencies
 , guile, parallel, qt5, jsoncpp, termcolor
 }:
@@ -11,7 +11,7 @@ clangStdenv.mkDerivation rec {
 
   src = ./.;
 
-  buildInputs = [ cmake pkgconfig ninja doxygen azmq
+  buildInputs = [ cmake pkgconfig ninja doxygen
                   boost zeromq libmsgpack termcolor
                   guile parallel qt5.qtbase jsoncpp ];
 
