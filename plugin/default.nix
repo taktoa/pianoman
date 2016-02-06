@@ -3,7 +3,7 @@
 # Program dependencies
 , boost, zeromq, libmsgpack
 # Misc dependencies
-, guile, parallel
+, guile, parallel, qt5, jsoncpp, termcolor
 }:
 
 clangStdenv.mkDerivation rec {
@@ -12,8 +12,8 @@ clangStdenv.mkDerivation rec {
   src = ./.;
 
   buildInputs = [ cmake pkgconfig ninja doxygen
-                  boost zeromq libmsgpack
-                  guile parallel ];
+                  boost zeromq libmsgpack termcolor
+                  guile parallel qt5.qtbase jsoncpp ];
 
   cmakeFlags = "-GNinja";
 

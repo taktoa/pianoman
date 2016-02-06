@@ -4,6 +4,15 @@
 let
   callPackage = pkgs.newScope self;
   self = rec {
+    termcolor = callPackage ./misc/termcolor {};
+    azmq = callPackage ./misc/azmq {};
+    jsoncpp = pkgs.jsoncpp.overrideDerivation (old: {
+        cmakeFlags = [
+            "-DBUILD_SHARED_LIBS=ON"
+            "-DBUILD_STATIC_LIBS=OFF"
+            "-DJSONCPP_WITH_CMAKE_PACKAGE=ON"
+        ];
+    });
     headlessTeamspeak = callPackage ./headless-teamspeak {};
     pianoman          = callPackage ./pianoman {
       teamspeak_client = teamspeak_with_plugins;

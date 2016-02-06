@@ -5,10 +5,12 @@
 #include <iostream>
 #include <streambuf>
 
-#include <boost/thread/thread.hpp>
-
-#include <msgpack.hpp>
+#include <json/json.h>
 #include <zmq.hpp>
+
+#include <QObject>
+
+class QSocketNotifier;
 
 // //! FIXME: doc
 // namespace msgpack {
@@ -46,26 +48,27 @@ namespace rpc {
     };
 
     //! FIXME: doc
-    class server_handle_t {
+    class server_handle_t : QObject {
+    Q_OBJECT
     private:
-        //! FIXME: doc
-        boost::thread server_thread;
         // FIXME: Replace std::queue with something more thread-safe
         //! FIXME: doc
         std::queue<event_t> server_mailbox;
-        bool shutdown;
         zmq::context_t context;
         zmq::socket_t publisher;
+        zmq::socket_t request_server;
+        QSocketNotifier *socket_notifier;
     public:
         //! FIXME: doc
         server_handle_t();
         //! FIXME: doc
-        void send_event(const event_t &event);
-        void operator()();
+        void send_event(const Json::Value msg);
         //! FIXME: doc
         void start_server();
         //! FIXME: doc
         void shutdown_server();
+    public slots:
+        void socket_ready(int socket);
     };
 
 
