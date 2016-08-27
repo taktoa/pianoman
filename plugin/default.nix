@@ -1,12 +1,12 @@
 # Build dependencies
-{ clangStdenv, cmake, pkgconfig, doxygen, ninja
+{ stdenv, cmake, pkgconfig, doxygen, ninja
 # Program dependencies
 , boost, zeromq, libmsgpack
 # Misc dependencies
 , guile, parallel, qt5, jsoncpp, termcolor
 }:
 
-clangStdenv.mkDerivation rec {
+stdenv.mkDerivation rec {
   name = "teamspeak-zeromq-plugin-0.0.1";
 
   src = ./.;

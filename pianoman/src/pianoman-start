@@ -78,6 +78,11 @@ while (( $# > 1 )); do
 done
 
 set-pianoman-environment-variables "${TS_HOME}"
+#unset DISPLAY
+
+eval $(dbus-launch --sh-syntax)
+
+env | grep DBUS
 
 @pulseaudioBinary@ -n --use-pid-file=true -F @pulseConfig@ &
 export QT_QPA_PLATFORM="offscreen"
@@ -85,3 +90,4 @@ PULSE_SINK="@pulseLoopbackSink@" \
 PULSE_SOURCE="@pulseInputSink@.monitor" \
           @headlessTeamspeakBinary@
 @pulseaudioBinary@ -k
+kill ${DBUS_SESSION_BUS_PID}
