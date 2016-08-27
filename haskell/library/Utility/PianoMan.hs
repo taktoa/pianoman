@@ -71,7 +71,7 @@ teamspeak :: (MonadSafe m, Base m ~ IO) => Producer ByteString m ()
 teamspeak = zmqProducer zmqAddress [""]
 
 deserialize :: MonadThrow m => Pipe ByteString RawEvent m ()
-deserialize = do
+deserialize = forever $ do
   input <- await
   case Aeson.eitherDecodeStrict' input of
     Left msg    -> throwDeserializationError msg
