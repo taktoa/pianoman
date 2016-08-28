@@ -5,46 +5,34 @@
 #include <iostream>
 #include <streambuf>
 
-#include <json/json.h>
+#include <nlohmann/json.hpp>
 #include <zmq.hpp>
 
 #include <QObject>
 
 class QSocketNotifier;
 
-// //! FIXME: doc
-// namespace msgpack {
-//     MSGPACK_API_VERSION_NAMESPACE(MSGPACK_DEFAULT_API_NS) {
-//         namespace adaptor {
-//             template <>
-//             struct pack<T> {
-//                 template <typename Stream>
-//                 msgpack::packer<Stream>& operator()(msgpack::packer<Stream>& o,
-//                                                     T const& v) const {
-//                     // packing implementation.
-//                     // o.pack_???(v.???);
-//                     return o;
-//                 }
-//             };
-//         } // namespace adaptor
-//     } // MSGPACK_API_VERSION_NAMESPACE(MSGPACK_DEFAULT_API_NS)
-// } // namespace msgpack
-
 //! FIXME: doc
 namespace rpc {
     //! FIXME: doc
     class event_t {
-    private:
     public:
         //! FIXME: doc
         virtual std::vector<uint8_t> serialize() const;
     };
+
+    //! FIXME: doc
     class simple_event : public event_t {
-    public:
-        simple_event(std::string message);
-        virtual std::vector<uint8_t> serialize() const;
     private:
+        // FIXME: doc
         std::vector<uint8_t> message;
+
+    public:
+        //! FIXME: doc
+        simple_event(std::string message);
+
+        //! FIXME: doc
+        virtual std::vector<uint8_t> serialize() const;
     };
 
     //! FIXME: doc
@@ -52,24 +40,36 @@ namespace rpc {
     Q_OBJECT
     private:
         // FIXME: Replace std::queue with something more thread-safe
-        //! FIXME: doc
+        // FIXME: doc
         std::queue<event_t> server_mailbox;
+
+        // FIXME: doc
         zmq::context_t context;
+
+        // FIXME: doc
         zmq::socket_t publisher;
+
+        // FIXME: doc
         zmq::socket_t request_server;
-        QSocketNotifier *socket_notifier;
+
+        // FIXME: doc
+        QSocketNotifier* socket_notifier;
+
     public:
         //! FIXME: doc
         server_handle_t();
+
         //! FIXME: doc
-        void send_event(const Json::Value msg);
+        void send_event(const nlohmann::json& msg);
+
         //! FIXME: doc
         void start_server();
+
         //! FIXME: doc
         void shutdown_server();
+
     public slots:
+        //! FIXME: doc
         void socket_ready(int socket);
     };
-
-
 } /* namespace rpc */

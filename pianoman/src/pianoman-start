@@ -86,8 +86,10 @@ env | grep DBUS
 
 @pulseaudioBinary@ -n --use-pid-file=true -F @pulseConfig@ &
 export QT_QPA_PLATFORM="offscreen"
-PULSE_SINK="@pulseLoopbackSink@" \
-PULSE_SOURCE="@pulseInputSink@.monitor" \
-          @headlessTeamspeakBinary@
+
+env PULSE_SINK="@pulseLoopbackSink@" \
+    PULSE_SOURCE="@pulseInputSink@.monitor" \
+    @headlessTeamSpeakBinary@
+
 @pulseaudioBinary@ -k
 kill ${DBUS_SESSION_BUS_PID}

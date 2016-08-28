@@ -1,5 +1,5 @@
 { stdenv, callPackage
-, headlessTeamspeak, teamspeak_client
+, headlessTeamSpeak, teamspeak_client
 , pulseaudioLight, pavucontrol, moc
 }:
 
@@ -32,7 +32,7 @@ stdenv.mkDerivation rec {
   version                 = "0.0.1";
   pulseaudioBinary        = "${pulseaudioLight}/bin/pulseaudio";
   teamspeakBinary         = "${teamspeak_client}/bin/ts3client";
-  headlessTeamspeakBinary = "${headlessTeamspeak}/bin/ts3client";
+  headlessTeamSpeakBinary = "${headlessTeamspeak}/bin/ts3client";
   mocBinary               = "${moc}/bin/mocp";
 
   pulseLoopbackSink = "ts";

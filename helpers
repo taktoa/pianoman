@@ -173,7 +173,8 @@ generate-emacs-include-path () {
             | resolve-paths \
             | enquote-all-lines \
             | tr '\n' ' ' \
-            | surround '(setq flycheck-clang-include-path (quote (' ')))' \
+            | surround '(progn (setq flycheck-clang-include-path (quote (' \
+                       '))) (setq flycheck-clang-args (quote ("-fPIC"))))' \
             | pretty-print-sexpr
     fi
 }

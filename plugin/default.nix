@@ -1,9 +1,9 @@
 # Build dependencies
-{ stdenv, cmake, pkgconfig, doxygen, ninja
+{ stdenv, cmake, pkgconfig, doxygen, ghostscript, ninja
 # Program dependencies
 , boost, zeromq, libmsgpack
 # Misc dependencies
-, guile, parallel, qt5, jsoncpp, termcolor
+, guile, parallel, qt5, nlohmann_json, termcolor
 }:
 
 stdenv.mkDerivation rec {
@@ -11,9 +11,11 @@ stdenv.mkDerivation rec {
 
   src = ./.;
 
-  buildInputs = [ cmake pkgconfig ninja doxygen
-                  boost zeromq libmsgpack termcolor
-                  guile parallel qt5.qtbase jsoncpp ];
+  buildInputs = [
+    cmake pkgconfig ninja doxygen ghostscript
+    boost zeromq libmsgpack termcolor
+    guile parallel qt5.qtbase nlohmann_json
+  ];
 
   cmakeFlags = "-GNinja";
 

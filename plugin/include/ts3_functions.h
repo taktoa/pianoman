@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+#include <cstddef>
+
 #include "teamspeak/clientlib_publicdefinitions.h"
 #include "teamspeak/public_definitions.h"
 #include "plugin_definitions.h"

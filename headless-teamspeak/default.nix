@@ -1,27 +1,26 @@
-{ stdenv, callPackage
-, teamspeak_client, libpulseaudio
-, headlessTeamspeakQt5 ? (callPackage ./qt5.nix {})
-}:
+{ stdenv, teamspeak_client, libpulseaudio, headlessQt }:
 
 let ts3Version = (builtins.parseDrvName teamspeak_client.name).version;
     rename = stdenv.lib.setName "teamspeak-headless-client-${ts3Version}";
-    inputs = { inherit libpulseaudio;
-               qtbase        = headlessTeamspeakQt5;
-               freetype      = headlessTeamspeakQt5;
-               # We don't want to provide any of the X libraries,
-               # but we need to give a path
-               xorg          = { libSM       = headlessTeamspeakQt5;
-                                 libICE      = headlessTeamspeakQt5;
-                                 libxcb      = headlessTeamspeakQt5;
-                                 libXrender  = headlessTeamspeakQt5;
-                                 libXrandr   = headlessTeamspeakQt5;
-                                 libXfixes   = headlessTeamspeakQt5;
-                                 libXcursor  = headlessTeamspeakQt5;
-                                 libXinerama = headlessTeamspeakQt5;
-                                 libXext     = headlessTeamspeakQt5;
-                                 libX11      = headlessTeamspeakQt5;
-                               };
-             };
+    inputs = {
+      inherit libpulseaudio;
+      qtbase   = headlessQt;
+      # We don't want to provide freetype or any of the X libraries,
+      # but we need to give a path
+      freetype = headlessQt;
+      xorg = {
+        libSM       = headlessQt;
+        libICE      = headlessQt;
+        libxcb      = headlessQt;
+        libXrender  = headlessQt;
+        libXrandr   = headlessQt;
+        libXfixes   = headlessQt;
+        libXcursor  = headlessQt;
+        libXinerama = headlessQt;
+        libXext     = headlessQt;
+        libX11      = headlessQt;
+      };
+    };
 in rename ((teamspeak_client.override inputs).overrideDerivation (old: {
   postInstall = old.installPhase + ''
       mv $out/bin/ts3client $out/bin/headless-teamspeak
