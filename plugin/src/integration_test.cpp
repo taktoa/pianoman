@@ -134,11 +134,11 @@ void integration_test() {
     // #### Required functions ####
 
 
-    cout << "Plugin name:        " << ts3plugin_name()        << endl;
-    cout << "Plugin version:     " << ts3plugin_version()     << endl;
-    cout << "Plugin API version: " << ts3plugin_apiVersion()  << endl;
-    cout << "Plugin author:      " << ts3plugin_author()      << endl;
-    cout << "Plugin description: " << ts3plugin_description() << endl;
+    std::cout << "Plugin name:        " << ts3plugin_name()        << "\n";
+    std::cout << "Plugin version:     " << ts3plugin_version()     << "\n";
+    std::cout << "Plugin API version: " << ts3plugin_apiVersion()  << "\n";
+    std::cout << "Plugin author:      " << ts3plugin_author()      << "\n";
+    std::cout << "Plugin description: " << ts3plugin_description() << "\n";
 
 
     // #### ClientLib ####
@@ -835,39 +835,39 @@ const struct TS3Functions noopFunctions = {
 };
 
 int process_args(int argc, char **argv) {
-    cout << "Executable: " << argv[0] << endl;
-    cout << "Arguments:" << endl;
+    std::cout << "Executable: " << argv[0] << "\n";
+    std::cout << "Arguments:\n";
     for(int i = 1; i < argc; ++i) {
-        cout << "  " << i << ": " << argv[i] << endl;
+        std::cout << "  " << i << ": " << argv[i] << "\n";
     }
     return 0;
 }
 
 int plugin_initialize() {
-    cout << "Setting plugin function pointers." << endl;
+    std::cout << "Setting plugin function pointers.\n";
     try {
         ts3plugin_setFunctionPointers(noopFunctions);
     } catch(const std::exception& e) {
-        cerr << "Error while setting plugin function pointers: "
-             << e.what() << endl;
+        std::cerr << "Error while setting plugin function pointers: "
+             << e.what() << "\n";
     } catch(...) {
-        cerr << "Error while setting plugin function pointers: UNKNOWN" << endl;
+        std::cerr << "Error while setting plugin function pointers: UNKNOWN\n";
         return 1;
     }
 
-    cout << "Initializing plugin." << endl;
+    std::cout << "Initializing plugin.\n";
     try {
         int result = ts3plugin_init();
 
         if(result != 0) {
-            cerr << "Error: plugin failed to initialize." << endl
-                 << "Initialization return code: " << result << endl;
+            std::cerr << "Error: plugin failed to initialize.\n"
+                 << "Initialization return code: " << result << "\n";
             return 1;
         }
     } catch(const std::exception& e) {
-        cerr << "Error during plugin initialization: " << e.what() << endl;
+        std::cerr << "Error during plugin initialization: " << e.what() << "\n";
     } catch(...) {
-        cerr << "Error during plugin initialization: UNKNOWN" << endl;
+        std::cerr << "Error during plugin initialization: UNKNOWN\n";
         return 1;
     }
     return 0;
@@ -875,31 +875,31 @@ int plugin_initialize() {
 
 int run_test() {
     const int max_iterations = 100000;
-    cout << "Starting integration test." << endl;
-    cout << "Running " << max_iterations << " times." << endl;
+    std::cout << "Starting integration test.\n";
+    std::cout << "Running " << max_iterations << " times.\n";
     try {
         for(int i = 0; i < max_iterations; ++i) {
-            cout << "Iteration #" << i << endl;
+            std::cout << "Iteration #" << i << "\n";
             integration_test();
             usleep(100000); // sleep for 0.1 seconds
         }
     } catch(const std::exception& e) {
-        cerr << "Error during integration test: " << e.what() << endl;
+        std::cerr << "Error during integration test: " << e.what() << "\n";
     } catch(...) {
-        cerr << "Error during integration test: UNKNOWN" << endl;
+        std::cerr << "Error during integration test: UNKNOWN\n";
     }
     return 0;
 }
 
 int plugin_shutdown() {
-    cout << "Shutting down plugin" << endl;
+    std::cout << "Shutting down plugin\n";
     try {
         ts3plugin_shutdown();
     } catch(const std::exception& e) {
-        cerr << "Error during plugin shutdown: " << e.what() << endl;
+        std::cerr << "Error during plugin shutdown: " << e.what() << "\n";
         return 3;
     } catch(...) {
-        cerr << "Error during plugin shutdown: UNKNOWN" << endl;
+        std::cerr << "Error during plugin shutdown: UNKNOWN\n";
         return 3;
     }
     return 0;

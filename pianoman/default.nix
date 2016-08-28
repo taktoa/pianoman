@@ -30,9 +30,9 @@ stdenv.mkDerivation rec {
   '';
 
   version                 = "0.0.1";
-  pulseaudioBinary        = "${pulseaudioLight}/bin/pulseaudio";
+  pulseaudioBinary        = "${pulseaudioLight.out}/bin/pulseaudio";
   teamspeakBinary         = "${teamspeak_client}/bin/ts3client";
-  headlessTeamSpeakBinary = "${headlessTeamspeak}/bin/ts3client";
+  headlessTeamSpeakBinary = "${headlessTeamSpeak}/bin/ts3client";
   mocBinary               = "${moc}/bin/mocp";
 
   pulseLoopbackSink = "ts";

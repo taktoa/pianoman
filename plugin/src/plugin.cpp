@@ -1016,6 +1016,27 @@ int32_t ts3plugin_onClientPokeEvent(uint64_t schandlerID,
     root["message"]      = message;
     root["ffIgnored"]    = ffIgnored;
     rpc_server->send_event(root);
+
+    std::string cluid;
+
+    {
+        char* temp;
+        auto status = ts3Functions.getClientSelfVariableAsString(schandlerID,
+                                                                 CLIENT_UNIQUE_IDENTIFIER,
+                                                                 &temp);
+        if(status == ERROR_ok) {
+            cluid = std::string { strdup(temp) };
+            ts3Functions.freeMemory(temp);
+        } else {
+            cluid = "";
+        }
+    }
+
+    //"avatar_" + cluid;
+
+    //ts3Functions.setClientSelfVariableAsInt(schandlerID, CLIENT_FLAG_AVATAR, 0);
+
+
     return 1; // 0 = handle normally, 1 = client will ignore the poke
 }
 

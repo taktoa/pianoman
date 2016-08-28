@@ -4,21 +4,21 @@ let ts3Version = (builtins.parseDrvName teamspeak_client.name).version;
     rename = stdenv.lib.setName "teamspeak-headless-client-${ts3Version}";
     inputs = {
       inherit libpulseaudio;
-      qtbase   = headlessQt;
+      inherit (headlessQt) qtbase;
       # We don't want to provide freetype or any of the X libraries,
       # but we need to give a path
-      freetype = headlessQt;
+      freetype = headlessQt.qtbase;
       xorg = {
-        libSM       = headlessQt;
-        libICE      = headlessQt;
-        libxcb      = headlessQt;
-        libXrender  = headlessQt;
-        libXrandr   = headlessQt;
-        libXfixes   = headlessQt;
-        libXcursor  = headlessQt;
-        libXinerama = headlessQt;
-        libXext     = headlessQt;
-        libX11      = headlessQt;
+        libSM       = headlessQt.qtbase;
+        libICE      = headlessQt.qtbase;
+        libxcb      = headlessQt.qtbase;
+        libXrender  = headlessQt.qtbase;
+        libXrandr   = headlessQt.qtbase;
+        libXfixes   = headlessQt.qtbase;
+        libXcursor  = headlessQt.qtbase;
+        libXinerama = headlessQt.qtbase;
+        libXext     = headlessQt.qtbase;
+        libX11      = headlessQt.qtbase;
       };
     };
 in rename ((teamspeak_client.override inputs).overrideDerivation (old: {
