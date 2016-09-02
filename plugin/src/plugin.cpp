@@ -3,6 +3,7 @@
 // -----------------------------------------------------------------------------
 
 #include <iostream>
+#include <thread>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,10 +14,15 @@
 #include <teamspeak/clientlib_publicdefinitions.h>
 
 #include <boost/thread.hpp>
+#include <boost/filesystem.hpp>
 
 #include <nlohmann/json.hpp>
 
 #include <termcolor/termcolor.hpp>
+
+#include <QCryptographicHash>
+#include <QFile>
+#include <QIODevice>
 
 #include "plugin.h"
 #include "rpc.hpp"
@@ -207,7 +213,7 @@ int32_t ts3plugin_offersConfigure() {
 
 //! Plugin might offer a configuration window.
 //! If ts3plugin_offersConfigure returns 0, this function will not be called.
-void ts3plugin_configure(void *handle, void *qParentWidget) {
+void ts3plugin_configure(void* handle, void* qParentWidget) {
     pluginLog_DEBUG("configure");
 }
 
@@ -219,10 +225,10 @@ void ts3plugin_configure(void *handle, void *qParentWidget) {
 //! function, so you must copy it and store it in the plugin.
 void ts3plugin_registerPluginID(ccstring_t id) {
     // FIXME: clean up
-    const size_t sz = strlen(id) + 1;
-    pluginID = (char *) malloc(sz * sizeof(char));
+    const size_t size = strlen(id) + 1;
+    pluginID = (char*) malloc(sizeof(char) * size);
     // The id buffer will invalidate after exiting this function, so we copy it
-    _strcpy(pluginID, sz, id);
+    _strcpy(pluginID, size, id);
     printf("PLUGIN: registerPluginID: %s\n", pluginID);
 }
 
@@ -264,13 +270,13 @@ ccstring_t ts3plugin_infoTitle() {
 void ts3plugin_infoData(uint64_t schandlerID,
                         uint64_t id,
                         enum PluginItemType type,
-                        char **data) {
+                        char** data) {
     data = NULL;
 }
 
 //! Required to release the memory for parameter "data" allocated
 //! in ts3plugin_infoData and ts3plugin_initMenus.
-void ts3plugin_freeMemory(void *data) { free(data); }
+void ts3plugin_freeMemory(void* data) { free(data); }
 
 //! If autoload is enabled, the plugin will request to always be automatically
 //! loaded by the client unless the user manually disabled it in the plugin
@@ -298,17 +304,21 @@ static menu_item_t* createMenuItem(menu_type_t type,
 
 // Some macros to make the code to create menu items a bit more readable.
 
-#define BEGIN_CREATE_MENUS(x)                                       \
-    const size_t sz = x + 1;                                        \
-    size_t n = 0;                                                   \
-    *menuItems = (menu_item_t **) malloc(sizeof(menu_item_t) * sz);
+#define BEGIN_CREATE_MENUS(x)                                           \
+    const size_t size = x + 1;                                          \
+    size_t n = 0;                                                       \
+    *menuItems = (menu_item_t**) malloc(sizeof(menu_item_t) * size);    \
 
-#define CREATE_MENU_ITEM(a, b, c, d)                \
-    (*menuItems)[n++] = createMenuItem(a, b, c, d);
+#define CREATE_MENU_ITEM(a, b, c, d)                    \
+    {                                                   \
+        (*menuItems)[n++] = createMenuItem(a, b, c, d); \
+    }
 
 #define END_CREATE_MENUS                        \
-    (*menuItems)[n++] = NULL;                   \
-    assert(n == sz);
+    {                                           \
+        (*menuItems)[n++] = NULL;               \
+        assert(n == size);                      \
+    }
 
 //! This is an enum describing the menu IDs for this plugin.
 //! Pass these IDs when creating a menuitem to the TS3 client.
@@ -333,7 +343,7 @@ enum {
 //! to use menus.
 //! If plugin menus are not used by a plugin, do not implement this function or
 //! return NULL.
-void ts3plugin_initMenus(struct PluginMenuItem ***menuItems, char **menuIcon) {
+void ts3plugin_initMenus(struct PluginMenuItem*** menuItems, char** menuIcon) {
     // FIXME: cleanup
 
     // Create the menus
@@ -396,7 +406,7 @@ void ts3plugin_initMenus(struct PluginMenuItem ***menuItems, char **menuIcon) {
     // Specify an optional icon for the plugin. This icon is used for the
     // plugins submenu within context and main menus.
     // If unused, set menuIcon to NULL.
-    *menuIcon = (char *) malloc(PLUGIN_MENU_BUFSZ * sizeof(char));
+    *menuIcon = (char*) malloc(sizeof(char) * PLUGIN_MENU_BUFSZ);
     _strcpy(*menuIcon, PLUGIN_MENU_BUFSZ, "t.png");
 
     // Menus can be enabled or disabled with:
@@ -426,23 +436,28 @@ static hotkey_t* createHotkey(ccstring_t keyword, ccstring_t description) {
 
 // Some macros to make the code to create hotkeys a bit more readable
 
-#define BEGIN_CREATE_HOTKEYS(x)                             \
-    const size_t sz = x + 1;                                \
-    size_t n = 0;                                           \
-    *hotkeys = (hotkey_t**) malloc(sizeof(hotkey_t*) * sz);
+#define BEGIN_CREATE_HOTKEYS(x)                                 \
+    const size_t size = x + 1;                                  \
+    size_t n = 0;                                               \
+    *hotkeys = (hotkey_t**) malloc(sizeof(hotkey_t*) * size);
 
-#define CREATE_HOTKEY(a, b) (*hotkeys)[n++] = createHotkey(a, b);
+#define CREATE_HOTKEY(a, b)                     \
+    {                                           \
+        (*hotkeys)[n++] = createHotkey(a, b);   \
+    }
 
 #define END_CREATE_HOTKEYS                      \
-    (*hotkeys)[n++] = NULL;                     \
-    assert(n == sz);
+    {                                           \
+        (*hotkeys)[n++] = NULL;                 \
+        assert(n == size);                      \
+    }
 
 //! Initialize plugin hotkeys.
 //! If your plugin does not use this feature, this function can be omitted.
 //! Hotkeys require ts3plugin_registerPluginID and ts3plugin_freeMemory to be
 //! implemented.
 //! This function is automatically called by the client after ts3plugin_init.
-void ts3plugin_initHotkeys(struct PluginHotkey ***hotkeys) {
+void ts3plugin_initHotkeys(struct PluginHotkey*** hotkeys) {
     // FIXME: cleanup
 
     // Register hotkeys giving a keyword and a description.
@@ -464,7 +479,7 @@ void ts3plugin_initHotkeys(struct PluginHotkey ***hotkeys) {
 // -- TeamSpeak ClientLib callbacks --------------------------------------------
 // -----------------------------------------------------------------------------
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onConnectStatusChangeEvent(uint64_t schandlerID,
                                           int32_t newStatus,
                                           uint32_t errorNumber) {
@@ -476,7 +491,7 @@ void ts3plugin_onConnectStatusChangeEvent(uint64_t schandlerID,
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onNewChannelEvent(uint64_t schandlerID,
                                  uint64_t channelID,
                                  uint64_t channelParentID) {
@@ -488,7 +503,7 @@ void ts3plugin_onNewChannelEvent(uint64_t schandlerID,
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onNewChannelCreatedEvent(uint64_t schandlerID,
                                         uint64_t channelID,
                                         uint64_t channelParentID,
@@ -506,7 +521,7 @@ void ts3plugin_onNewChannelCreatedEvent(uint64_t schandlerID,
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onDelChannelEvent(uint64_t schandlerID,
                                  uint64_t channelID,
                                  ident_t invokerID,
@@ -522,7 +537,7 @@ void ts3plugin_onDelChannelEvent(uint64_t schandlerID,
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onChannelMoveEvent(uint64_t schandlerID,
                                   uint64_t channelID,
                                   uint64_t newChannelParentID,
@@ -540,7 +555,7 @@ void ts3plugin_onChannelMoveEvent(uint64_t schandlerID,
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onUpdateChannelEvent(uint64_t schandlerID, uint64_t channelID) {
     json root;
     root["tag"]         = "UpdateChannel";
@@ -549,7 +564,7 @@ void ts3plugin_onUpdateChannelEvent(uint64_t schandlerID, uint64_t channelID) {
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onUpdateChannelEditedEvent(uint64_t schandlerID,
                                           uint64_t channelID,
                                           ident_t invokerID,
@@ -559,11 +574,13 @@ void ts3plugin_onUpdateChannelEditedEvent(uint64_t schandlerID,
     root["tag"]         = "UpdateChannelEdited";
     root["schandlerID"] = schandlerID;
     root["channelID"]   = channelID;
-    // FIXME: add rest of key-value pairs
+    root["invokerID"]   = invokerID;
+    root["invokerName"] = invokerName;
+    root["invokerUID"]  = invokerUID;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onUpdateClientEvent(uint64_t schandlerID,
                                    ident_t clientID,
                                    ident_t invokerID,
@@ -572,11 +589,14 @@ void ts3plugin_onUpdateClientEvent(uint64_t schandlerID,
     json root;
     root["tag"]         = "UpdateClient";
     root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["clientID"]    = clientID;
+    root["invokerID"]   = invokerID;
+    root["invokerName"] = invokerName;
+    root["invokerUID"]  = invokerUID;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onClientMoveEvent(uint64_t schandlerID,
                                  ident_t clientID,
                                  uint64_t oldChannelID,
@@ -584,26 +604,33 @@ void ts3plugin_onClientMoveEvent(uint64_t schandlerID,
                                  int32_t visibility,
                                  ccstring_t moveMessage) {
     json root;
-    root["tag"]         = "ClientMove";
-    root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]          = "ClientMove";
+    root["schandlerID"]  = schandlerID;
+    root["clientID"]     = clientID;
+    root["oldChannelID"] = oldChannelID;
+    root["newChannelID"] = newChannelID;
+    root["visibility"]   = visibility;
+    root["moveMessage"]  = moveMessage;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onClientMoveSubscriptionEvent(uint64_t schandlerID,
                                              ident_t clientID,
                                              uint64_t oldChannelID,
                                              uint64_t newChannelID,
                                              int32_t visibility) {
     json root;
-    root["tag"]         = "ClientMoveSubscription";
-    root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]          = "ClientMoveSubscription";
+    root["schandlerID"]  = schandlerID;
+    root["clientID"]     = clientID;
+    root["oldChannelID"] = oldChannelID;
+    root["newChannelID"] = newChannelID;
+    root["visibility"]   = visibility;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onClientMoveTimeoutEvent(uint64_t schandlerID,
                                         ident_t clientID,
                                         uint64_t oldChannelID,
@@ -611,13 +638,17 @@ void ts3plugin_onClientMoveTimeoutEvent(uint64_t schandlerID,
                                         int32_t visibility,
                                         ccstring_t timeoutMessage) {
     json root;
-    root["tag"]         = "ClientMoveTimeout";
-    root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]            = "ClientMoveTimeout";
+    root["schandlerID"]    = schandlerID;
+    root["clientID"]       = clientID;
+    root["oldChannelID"]   = oldChannelID;
+    root["newChannelID"]   = newChannelID;
+    root["visibility"]     = visibility;
+    root["timeoutMessage"] = timeoutMessage;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onClientMoveMovedEvent(uint64_t schandlerID,
                                       ident_t clientID,
                                       uint64_t oldChannelID,
@@ -628,13 +659,20 @@ void ts3plugin_onClientMoveMovedEvent(uint64_t schandlerID,
                                       ccstring_t moverUID,
                                       ccstring_t moveMessage) {
     json root;
-    root["tag"]         = "ClientMoveMoved";
-    root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]          = "ClientMoveMoved";
+    root["schandlerID"]  = schandlerID;
+    root["clientID"]     = clientID;
+    root["oldChannelID"] = oldChannelID;
+    root["newChannelID"] = newChannelID;
+    root["visibility"]   = visibility;
+    root["moverID"]      = moverID;
+    root["moverName"]    = moverName;
+    root["moverUID"]     = moverUID;
+    root["moveMessage"]  = moveMessage;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onClientKickFromChannelEvent(uint64_t schandlerID,
                                             ident_t clientID,
                                             uint64_t oldChannelID,
@@ -645,13 +683,20 @@ void ts3plugin_onClientKickFromChannelEvent(uint64_t schandlerID,
                                             ccstring_t kickerUID,
                                             ccstring_t kickMessage) {
     json root;
-    root["tag"]         = "ClientKickFromChannel";
-    root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]          = "ClientKickFromChannel";
+    root["schandlerID"]  = schandlerID;
+    root["clientID"]     = clientID;
+    root["oldChannelID"] = oldChannelID;
+    root["newChannelID"] = newChannelID;
+    root["visibility"]   = visibility;
+    root["kickerID"]     = kickerID;
+    root["kickerName"]   = kickerName;
+    root["kickerUID"]    = kickerUID;
+    root["kickMessage"]  = kickMessage;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onClientKickFromServerEvent(uint64_t schandlerID,
                                            ident_t clientID,
                                            uint64_t oldChannelID,
@@ -662,13 +707,20 @@ void ts3plugin_onClientKickFromServerEvent(uint64_t schandlerID,
                                            ccstring_t kickerUID,
                                            ccstring_t kickMessage) {
     json root;
-    root["tag"]         = "ClientKickFromServer";
-    root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]          = "ClientKickFromServer";
+    root["schandlerID"]  = schandlerID;
+    root["clientID"]     = clientID;
+    root["oldChannelID"] = oldChannelID;
+    root["newChannelID"] = newChannelID;
+    root["visibility"]   = visibility;
+    root["kickerID"]     = kickerID;
+    root["kickerName"]   = kickerName;
+    root["kickerUID"]    = kickerUID;
+    root["kickMessage"]  = kickMessage;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onClientIDsEvent(uint64_t schandlerID,
                                 ccstring_t clientUID,
                                 ident_t clientID,
@@ -676,20 +728,21 @@ void ts3plugin_onClientIDsEvent(uint64_t schandlerID,
     json root;
     root["tag"]         = "ClientIDs";
     root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["clientUID"]   = clientUID;
+    root["clientID"]    = clientID;
+    root["clientName"]  = clientName;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onClientIDsFinishedEvent(uint64_t schandlerID) {
     json root;
     root["tag"]         = "ClientIDsFinished";
     root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onServerEditedEvent(uint64_t schandlerID,
                                    ident_t editorID,
                                    ccstring_t editorName,
@@ -697,51 +750,54 @@ void ts3plugin_onServerEditedEvent(uint64_t schandlerID,
     json root;
     root["tag"]         = "ServerEdited";
     root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["editorID"]    = editorID;
+    root["editorName"]  = editorName;
+    root["editorUID"]   = editorUID;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onServerUpdatedEvent(uint64_t schandlerID) {
     json root;
     root["tag"]         = "ServerUpdated";
     root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 int32_t ts3plugin_onServerErrorEvent(uint64_t schandlerID,
                                      ccstring_t errorMessage,
                                      uint32_t error,
                                      ccstring_t returnCode,
                                      ccstring_t extraMessage) {
     // FIXME: cleanup
-    printf("PLUGIN: onServerErrorEvent %llu %s %d %s\n",
-           (long long unsigned int) schandlerID,
-           errorMessage,
-           error,
-           (returnCode ? returnCode : ""));
+    json root;
+    root["schandlerID"] = schandlerID;
+    root["errorMessage"] = errorMessage;
+    root["error"] = error;
+    root["returnCode"] = returnCode;
+    root["extraMessage"] = extraMessage;
+    rpc_server->send_event(root);
     if(returnCode) {
         // A plugin could now check the returnCode with previously (when calling
-        // a function) remembered returnCodes and react accordingly
+        // a function) remembered returnCodes and react accordingly.
         // In case of using a a plugin return code, the plugin can return:
         // 0: Client will continue handling this error (print32_t to chat tab)
-        // 1: Client will ignore this error, the plugin announces it has handled
-        // it
+        // 1: Client will ignore this error, as it's been handled by the plugin
         return 1;
     }
-    return 0; /* If no plugin return code was used, the return value of this
-                 function is ignored */
+    return 0;
+    // If no plugin return code was used, the return value of this
+    // function is ignored.
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onServerStopEvent(uint64_t schandlerID,
                                  ccstring_t shutdownMessage) {
     json root;
-    root["tag"]         = "ServerStop";
-    root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]             = "ServerStop";
+    root["schandlerID"]     = schandlerID;
+    root["shutdownMessage"] = shutdownMessage;
     rpc_server->send_event(root);
 }
 
@@ -772,7 +828,7 @@ int32_t ts3plugin_onTextMessageEvent(uint64_t schandlerID,
     return 0;
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onTalkStatusChangeEvent(uint64_t schandlerID,
                                        int32_t status,
                                        int32_t isReceivedWhisper,
@@ -786,7 +842,7 @@ void ts3plugin_onTalkStatusChangeEvent(uint64_t schandlerID,
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onConnectionInfoEvent(uint64_t schandlerID, ident_t clientID) {
     json root;
     root["tag"]         = "ConnectionInfo";
@@ -795,7 +851,7 @@ void ts3plugin_onConnectionInfoEvent(uint64_t schandlerID, ident_t clientID) {
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onServerConnectionInfoEvent(uint64_t schandlerID) {
     json root;
     root["tag"]         = "ServerConnectionInfo";
@@ -803,7 +859,7 @@ void ts3plugin_onServerConnectionInfoEvent(uint64_t schandlerID) {
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onChannelSubscribeEvent(uint64_t schandlerID,
                                        uint64_t channelID) {
     json root;
@@ -813,7 +869,7 @@ void ts3plugin_onChannelSubscribeEvent(uint64_t schandlerID,
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onChannelSubscribeFinishedEvent(uint64_t schandlerID) {
     json root;
     root["tag"]         = "ChannelSubscribeFinished";
@@ -821,7 +877,7 @@ void ts3plugin_onChannelSubscribeFinishedEvent(uint64_t schandlerID) {
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onChannelUnsubscribeEvent(uint64_t schandlerID,
                                          uint64_t channelID) {
     json root;
@@ -831,7 +887,7 @@ void ts3plugin_onChannelUnsubscribeEvent(uint64_t schandlerID,
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onChannelUnsubscribeFinishedEvent(uint64_t schandlerID) {
     json root;
     root["tag"]         = "ChannelUnsubscribeFinished";
@@ -839,47 +895,45 @@ void ts3plugin_onChannelUnsubscribeFinishedEvent(uint64_t schandlerID) {
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onChannelDescriptionUpdateEvent(uint64_t schandlerID,
                                                uint64_t channelID) {
     json root;
     root["tag"]         = "ChannelDescriptionUpdate";
     root["schandlerID"] = schandlerID;
     root["channelID"]   = channelID;
-    // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onChannelPasswordChangedEvent(uint64_t schandlerID,
                                              uint64_t channelID) {
     json root;
     root["tag"]         = "ChannelPasswordChanged";
     root["schandlerID"] = schandlerID;
     root["channelID"]   = channelID;
-    // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onPlaybackShutdownCompleteEvent(uint64_t schandlerID) {
     json root;
     root["tag"]         = "PlaybackShutdownComplete";
     root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onSoundDeviceListChangedEvent(ccstring_t modeID,
                                              int32_t playOrCap) {
     json root;
-    root["tag"] = "SoundDeviceListChanged";
-    // FIXME: add rest of key-value pairs
+    root["tag"]       = "SoundDeviceListChanged";
+    root["modeID"]    = modeID;
+    root["playOrCap"] = playOrCap;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onEditPlaybackVoiceDataEvent(uint64_t schandlerID,
                                             ident_t clientID,
                                             short* samples,
@@ -888,15 +942,18 @@ void ts3plugin_onEditPlaybackVoiceDataEvent(uint64_t schandlerID,
     //~ json root;
     //~ root["tag"]         = "EditPlaybackVoiceData";
     //~ root["schandlerID"] = schandlerID;
-    //~ // FIXME: add rest of key-value pairs
-    //~ // FIXME: must use req-rep, not publisher
+    //~ root["clientID"]    = clientID;
+    //~ root["samples"]     = samples;
+    //~ root["sampleCount"] = sampleCount;
+    //~ root["channels"]    = channels;
+    //~ // FIXME: use req-rep rather than publisher
     //~ rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onEditPostProcessVoiceDataEvent(uint64_t schandlerID,
                                                ident_t clientID,
-                                               short *samples,
+                                               short* samples,
                                                int32_t sampleCount,
                                                int32_t channels,
                                                const uint32_t* speakers,
@@ -904,77 +961,107 @@ void ts3plugin_onEditPostProcessVoiceDataEvent(uint64_t schandlerID,
     //~ json root;
     //~ root["tag"]         = "EditPostProcessVoiceData";
     //~ root["schandlerID"] = schandlerID;
-    //~ // FIXME: add rest of key-value pairs
-    //~ // FIXME: must use req-rep, not publisher
+    //~ root["clientID"]    = clientID;
+    //~ root["samples"]     = samples;
+    //~ root["sampleCount"] = sampleCount;
+    //~ root["channels"]    = channels;
+    //~ root["speakers"]    = speakers;
+    //~ root["fillMask"]    = fillMask;
+    //~ // FIXME: use req-rep rather than publisher
     //~ rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onEditMixedPlaybackVoiceDataEvent(uint64_t schandlerID,
-                                                 short *samples,
+                                                 short* samples,
                                                  int32_t sampleCount,
                                                  int32_t channels,
-                                                 const uint32_t *speakers,
-                                                 uint32_t *fillMask) {
+                                                 const uint32_t* speakers,
+                                                 uint32_t* fillMask) {
     //~ json root;
     //~ root["tag"]         = "EditMixedPlaybackVoiceData";
     //~ root["schandlerID"] = schandlerID;
-    //~ // FIXME: add rest of key-value pairs
-    //~ // FIXME: must use req-rep, not publisher
-    //~ //rpc_server->send_event(root);
+    //~ root["samples"]     = samples;
+    //~ root["sampleCount"] = sampleCount;
+    //~ root["channels"]    = channels;
+    //~ root["speakers"]    = speakers;
+    //~ root["fillMask"]    = fillMask;
+    //~ // FIXME: use req-rep rather than publisher
+    //~ rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onEditCapturedVoiceDataEvent(uint64_t schandlerID,
-                                            short *samples,
+                                            short* samples,
                                             int32_t sampleCount,
                                             int32_t channels,
-                                            int32_t *edited) {
-
+                                            int32_t* edited) {
     //~ json root;
     //~ root["tag"]         = "EditCapturedVoiceData";
     //~ root["schandlerID"] = schandlerID;
-    //~ // FIXME: add rest of key-value pairs
-    //~ // FIXME: must use req-rep, not publisher
-    //~ //rpc_server->send_event(root);
+    //~ root["samples"]     = samples;
+    //~ root["sampleCount"] = sampleCount;
+    //~ root["channels"]    = channels;
+    //~ root["edited"]      = edited;
+    //~ // FIXME: use req-rep rather than publisher
+    //~ rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onCustom3dRolloffCalculationClientEvent(uint64_t schandlerID,
                                                        ident_t clientID,
                                                        float distance,
-                                                       float *volume) {
+                                                       float* volume) {
     //~ json root;
     //~ root["tag"]         = "Custom3dRolloffCalculationClient";
     //~ root["schandlerID"] = schandlerID;
-    //~ // FIXME: add rest of key-value pairs
-    //~ // FIXME: must use req-rep, not publisher
+    //~ root["clientID"]    = clientID;
+    //~ root["distance"]    = distance;
+    //~ root["volume"]      = volume;
+    //~ // FIXME: use req-rep rather than publisher
     //~ rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onCustom3dRolloffCalculationWaveEvent(uint64_t schandlerID,
                                                      uint64_t waveHandle,
                                                      float distance,
-                                                     float *volume) {
+                                                     float* volume) {
     //~ json root;
     //~ root["tag"]         = "Custom3dRolloffCalculationWave";
     //~ root["schandlerID"] = schandlerID;
-    //~ // FIXME: add rest of key-value pairs
-    //~ // FIXME: must use req-rep, not publisher
+    //~ root["waveHandle"]  = waveHandle;
+    //~ root["distance"]    = distance;
+    //~ root["volume"]      = volume;
+    //~ // FIXME: use req-rep rather than publisher
     //~ rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onUserLoggingMessageEvent(ccstring_t logMessage,
                                          int32_t logLevel,
                                          ccstring_t logChannel,
                                          uint64_t logID,
                                          ccstring_t logTime,
                                          ccstring_t completeLogString) {
+    ccstring_t logLevelString = "UNKNOWN";
+
+    switch(logLevel) {
+    case LogLevel_CRITICAL: { logLevelString = "CRITICAL"; break; }
+    case LogLevel_ERROR:    { logLevelString = "ERROR";    break; }
+    case LogLevel_WARNING:  { logLevelString = "WARNING";  break; }
+    case LogLevel_DEBUG:    { logLevelString = "DEBUG";    break; }
+    case LogLevel_INFO:     { logLevelString = "INFO";     break; }
+    case LogLevel_DEVEL:    { logLevelString = "DEVEL";    break; }
+    }
+
     json root;
-    root["tag"] = "UserLoggingMessage";
-    // FIXME: add rest of key-value pairs
+    root["tag"]        = "UserLoggingMessage";
+    root["logMessage"] = logMessage;
+    root["logLevel"]   = logLevelString;
+    root["logChannel"] = logChannel;
+    root["logID"]      = logID;
+    root["logTime"]    = logTime;
     rpc_server->send_event(root);
 }
 
@@ -982,7 +1069,7 @@ void ts3plugin_onUserLoggingMessageEvent(ccstring_t logMessage,
 // -- TeamSpeak ClientLib rare callbacks ---------------------------------------
 // -----------------------------------------------------------------------------
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onClientBanFromServerEvent(uint64_t schandlerID,
                                           ident_t clientID,
                                           uint64_t oldChannelID,
@@ -994,13 +1081,21 @@ void ts3plugin_onClientBanFromServerEvent(uint64_t schandlerID,
                                           uint64_t time,
                                           ccstring_t kickMessage) {
     json root;
-    root["tag"]         = "ClientBanFromServer";
-    root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]          = "ClientBanFromServer";
+    root["schandlerID"]  = schandlerID;
+    root["clientID"]     = clientID;
+    root["oldChannelID"] = oldChannelID;
+    root["newChannelID"] = newChannelID;
+    root["visibility"]   = visibility;
+    root["kickerID"]     = kickerID;
+    root["kickerName"]   = kickerName;
+    root["kickerUID"]    = kickerUID;
+    root["time"]         = time;
+    root["kickMessage"]  = kickMessage;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 int32_t ts3plugin_onClientPokeEvent(uint64_t schandlerID,
                                     ident_t fromClientID,
                                     ccstring_t pokerName,
@@ -1017,42 +1112,71 @@ int32_t ts3plugin_onClientPokeEvent(uint64_t schandlerID,
     root["ffIgnored"]    = ffIgnored;
     rpc_server->send_event(root);
 
-    std::string cluid;
-
     {
-        char* temp;
-        auto status = ts3Functions.getClientSelfVariableAsString(schandlerID,
-                                                                 CLIENT_UNIQUE_IDENTIFIER,
-                                                                 &temp);
-        if(status == ERROR_ok) {
-            cluid = std::string { strdup(temp) };
-            ts3Functions.freeMemory(temp);
-        } else {
-            cluid = "";
+        boost::filesystem::path dir { "/tmp/pianoman" };
+        bool created = boost::filesystem::create_directory(dir);
+
+        {
+            std::string home {strdup(std::getenv("HOME"))};
+            std::ifstream source {home + "/test-avatar2.png", std::ios::binary};
+            std::ofstream dest {"/tmp/pianoman/avatar", std::ios::binary};
+            dest << source.rdbuf();
         }
+
+        ident_t ftid;
+        ts3Functions.sendFile(schandlerID, 0, "", "avatar",
+                              1, 0, "/tmp/pianoman", &ftid, nullptr);
+
+        std::thread check_thread {
+            [&]() {
+                int result = 0;
+                do {
+                    ts3Functions.getTransferStatus(ftid, &result);
+                    usleep(1000);
+                } while(result != FILETRANSFER_FINISHED);
+            }
+        };
+
+        check_thread.join();
+
+        std::string hash = "";
+
+        {
+            QFile file("/tmp/pianoman/avatar");
+
+            if(file.open(QIODevice::ReadOnly)) {
+                using QCrypto = QCryptographicHash;
+                QByteArray fileData = file.readAll();
+                QByteArray hashData = QCrypto::hash(fileData, QCrypto::Md5);
+                hash = hashData.toHex().toStdString();
+            }
+        }
+
+        ts3Functions.setClientSelfVariableAsString(schandlerID,
+                                                   CLIENT_FLAG_AVATAR,
+                                                   hash.c_str());
+
+        ts3Functions.flushClientSelfUpdates(schandlerID, nullptr);
     }
-
-    //"avatar_" + cluid;
-
-    //ts3Functions.setClientSelfVariableAsInt(schandlerID, CLIENT_FLAG_AVATAR, 0);
-
 
     return 1; // 0 = handle normally, 1 = client will ignore the poke
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onClientSelfVariableUpdateEvent(uint64_t schandlerID,
                                                int32_t flag,
                                                ccstring_t oldValue,
                                                ccstring_t newValue) {
     json root;
-    root["tag"]         = "ClientSelfVariableUpdateEvent";
+    root["tag"]         = "ClientSelfVariableUpdate";
     root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["flag"]        = flag;
+    root["oldValue"]    = oldValue;
+    root["newValue"]    = newValue;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onFileListEvent(uint64_t schandlerID,
                                uint64_t channelID,
                                ccstring_t path,
@@ -1063,14 +1187,20 @@ void ts3plugin_onFileListEvent(uint64_t schandlerID,
                                uint64_t incompleteSize,
                                ccstring_t returnCode) {
     json root;
-    root["tag"]         = "FileList";
-    root["schandlerID"] = schandlerID;
-    root["channelID"]   = channelID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]            = "FileList";
+    root["schandlerID"]    = schandlerID;
+    root["channelID"]      = channelID;
+    root["path"]           = path;
+    root["name"]           = name;
+    root["size"]           = size;
+    root["datetime"]       = datetime;
+    root["type"]           = type;
+    root["incompleteSize"] = incompleteSize;
+    root["returnCode"]     = returnCode;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onFileListFinishedEvent(uint64_t schandlerID,
                                        uint64_t channelID,
                                        ccstring_t path) {
@@ -1078,11 +1208,11 @@ void ts3plugin_onFileListFinishedEvent(uint64_t schandlerID,
     root["tag"]         = "FileListFinished";
     root["schandlerID"] = schandlerID;
     root["channelID"]   = channelID;
-    // FIXME: add rest of key-value pairs
+    root["path"]        = path;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onFileInfoEvent(uint64_t schandlerID,
                                uint64_t channelID,
                                ccstring_t name,
@@ -1092,11 +1222,13 @@ void ts3plugin_onFileInfoEvent(uint64_t schandlerID,
     root["tag"]         = "FileInfo";
     root["schandlerID"] = schandlerID;
     root["channelID"]   = channelID;
-    // FIXME: add rest of key-value pairs
+    root["name"]        = name;
+    root["size"]        = size;
+    root["datetime"]    = datetime;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onServerGroupListEvent(uint64_t schandlerID,
                                       uint64_t serverGroupID,
                                       ccstring_t name,
@@ -1104,34 +1236,39 @@ void ts3plugin_onServerGroupListEvent(uint64_t schandlerID,
                                       int32_t iconID,
                                       int32_t saveDB) {
     json root;
-    root["tag"]         = "ServerGroupList";
-    root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]           = "ServerGroupList";
+    root["schandlerID"]   = schandlerID;
+    root["serverGroupID"] = serverGroupID;
+    root["name"]          = name;
+    root["type"]          = type;
+    root["iconID"]        = iconID;
+    root["saveDB"]        = saveDB;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onServerGroupListFinishedEvent(uint64_t schandlerID) {
     json root;
     root["tag"]         = "ServerGroupListFinished";
     root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onServerGroupByClientIDEvent(uint64_t schandlerID,
                                             ccstring_t name,
                                             uint64_t serverGroupList,
                                             uint64_t clientDBID) {
     json root;
-    root["tag"]         = "ServerGroupByClientID";
-    root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]             = "ServerGroupByClientID";
+    root["schandlerID"]     = schandlerID;
+    root["name"]            = name;
+    root["serverGroupList"] = serverGroupList;
+    root["clientDBID"]      = clientDBID;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onServerGroupPermListEvent(uint64_t schandlerID,
                                           uint64_t serverGroupID,
                                           uint32_t permissionID,
@@ -1139,36 +1276,43 @@ void ts3plugin_onServerGroupPermListEvent(uint64_t schandlerID,
                                           int32_t permissionNegated,
                                           int32_t permissionSkip) {
     json root;
-    root["tag"]         = "ServerGroupPermList";
-    root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]               = "ServerGroupPermList";
+    root["schandlerID"]       = schandlerID;
+    root["serverGroupID"]     = serverGroupID;
+    root["permissionID"]      = permissionID;
+    root["permissionValue"]   = permissionValue;
+    root["permissionNegated"] = permissionNegated;
+    root["permissionSkip"]    = permissionSkip;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onServerGroupPermListFinishedEvent(uint64_t schandlerID,
                                                   uint64_t serverGroupID) {
     json root;
-    root["tag"]         = "ServerGroupPermListFinished";
-    root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]           = "ServerGroupPermListFinished";
+    root["schandlerID"]   = schandlerID;
+    root["serverGroupID"] = serverGroupID;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onServerGroupClientListEvent(uint64_t schandlerID,
                                             uint64_t serverGroupID,
                                             uint64_t clientDBID,
-                                            ccstring_t clientNameIdentifier,
-                                            ccstring_t clientUniqueID) {
+                                            ccstring_t clientName,
+                                            ccstring_t clientUID) {
     json root;
-    root["tag"]         = "ServerGroupClientList";
-    root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]           = "ServerGroupClientList";
+    root["schandlerID"]   = schandlerID;
+    root["serverGroupID"] = serverGroupID;
+    root["clientDBID"]    = clientDBID;
+    root["clientName"]    = clientName;
+    root["clientUID"]     = clientUID;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onChannelGroupListEvent(uint64_t schandlerID,
                                        uint64_t channelGroupID,
                                        ccstring_t name,
@@ -1176,22 +1320,25 @@ void ts3plugin_onChannelGroupListEvent(uint64_t schandlerID,
                                        int32_t iconID,
                                        int32_t saveDB) {
     json root;
-    root["tag"]         = "ChannelGroupList";
-    root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]            = "ChannelGroupList";
+    root["schandlerID"]    = schandlerID;
+    root["channelGroupID"] = channelGroupID;
+    root["name"]           = name;
+    root["type"]           = type;
+    root["iconID"]         = iconID;
+    root["saveDB"]         = saveDB;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onChannelGroupListFinishedEvent(uint64_t schandlerID) {
     json root;
     root["tag"]         = "ChannelGroupListFinished";
     root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onChannelGroupPermListEvent(uint64_t schandlerID,
                                            uint64_t channelGroupID,
                                            uint32_t permissionID,
@@ -1199,23 +1346,27 @@ void ts3plugin_onChannelGroupPermListEvent(uint64_t schandlerID,
                                            int32_t permissionNegated,
                                            int32_t permissionSkip) {
     json root;
-    root["tag"]         = "ChannelGroupPermList";
-    root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]               = "ChannelGroupPermList";
+    root["schandlerID"]       = schandlerID;
+    root["channelGroupID"]    = channelGroupID;
+    root["permissionID"]      = permissionID;
+    root["permissionValue"]   = permissionValue;
+    root["permissionNegated"] = permissionNegated;
+    root["permissionSkip"]    = permissionSkip;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onChannelGroupPermListFinishedEvent(uint64_t schandlerID,
                                                    uint64_t channelGroupID) {
     json root;
-    root["tag"]         = "ChannelGroupPermListFinished";
-    root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]            = "ChannelGroupPermListFinished";
+    root["schandlerID"]    = schandlerID;
+    root["channelGroupID"] = channelGroupID;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onChannelPermListEvent(uint64_t schandlerID,
                                       uint64_t channelID,
                                       uint32_t permissionID,
@@ -1223,25 +1374,27 @@ void ts3plugin_onChannelPermListEvent(uint64_t schandlerID,
                                       int32_t permissionNegated,
                                       int32_t permissionSkip) {
     json root;
-    root["tag"]         = "ChannelPermList";
-    root["schandlerID"] = schandlerID;
-    root["channelID"]   = channelID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]               = "ChannelPermList";
+    root["schandlerID"]       = schandlerID;
+    root["channelID"]         = channelID;
+    root["permissionID"]      = permissionID;
+    root["permissionValue"]   = permissionValue;
+    root["permissionNegated"] = permissionNegated;
+    root["permissionSkip"]    = permissionSkip;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onChannelPermListFinishedEvent(uint64_t schandlerID,
                                               uint64_t channelID) {
     json root;
     root["tag"]         = "ChannelPermListFinished";
     root["schandlerID"] = schandlerID;
     root["channelID"]   = channelID;
-    // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onClientPermListEvent(uint64_t schandlerID,
                                      uint64_t clientDBID,
                                      uint32_t permissionID,
@@ -1249,23 +1402,27 @@ void ts3plugin_onClientPermListEvent(uint64_t schandlerID,
                                      int32_t permissionNegated,
                                      int32_t permissionSkip) {
     json root;
-    root["tag"]         = "ClientPermList";
-    root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]               = "ClientPermList";
+    root["schandlerID"]       = schandlerID;
+    root["clientDBID"]        = clientDBID;
+    root["permissionID"]      = permissionID;
+    root["permissionValue"]   = permissionValue;
+    root["permissionNegated"] = permissionNegated;
+    root["permissionSkip"]    = permissionSkip;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onClientPermListFinishedEvent(uint64_t schandlerID,
                                              uint64_t clientDBID) {
     json root;
     root["tag"]         = "ClientPermListFinished";
     root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["clientDBID"]  = clientDBID;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onChannelClientPermListEvent(uint64_t schandlerID,
                                             uint64_t channelID,
                                             uint64_t clientDBID,
@@ -1274,14 +1431,18 @@ void ts3plugin_onChannelClientPermListEvent(uint64_t schandlerID,
                                             int32_t permissionNegated,
                                             int32_t permissionSkip) {
     json root;
-    root["tag"]         = "ChannelClientPermList";
-    root["schandlerID"] = schandlerID;
-    root["channelID"]   = channelID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]               = "ChannelClientPermList";
+    root["schandlerID"]       = schandlerID;
+    root["channelID"]         = channelID;
+    root["clientDBID"]        = clientDBID;
+    root["permissionID"]      = permissionID;
+    root["permissionValue"]   = permissionValue;
+    root["permissionNegated"] = permissionNegated;
+    root["permissionSkip"]    = permissionSkip;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onChannelClientPermListFinishedEvent(uint64_t schandlerID,
                                                     uint64_t channelID,
                                                     uint64_t clientDBID) {
@@ -1289,11 +1450,11 @@ void ts3plugin_onChannelClientPermListFinishedEvent(uint64_t schandlerID,
     root["tag"]         = "ChannelClientPermListFinished";
     root["schandlerID"] = schandlerID;
     root["channelID"]   = channelID;
-    // FIXME: add rest of key-value pairs
+    root["clientDBID"]  = clientDBID;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onClientChannelGroupChangedEvent(uint64_t schandlerID,
                                                 uint64_t channelGroupID,
                                                 uint64_t channelID,
@@ -1302,59 +1463,67 @@ void ts3plugin_onClientChannelGroupChangedEvent(uint64_t schandlerID,
                                                 ccstring_t invokerName,
                                                 ccstring_t invokerUID) {
     json root;
-    root["tag"]         = "ClientChannelGroupChanged";
-    root["schandlerID"] = schandlerID;
-    root["channelID"]   = channelID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]             = "ClientChannelGroupChanged";
+    root["schandlerID"]     = schandlerID;
+    root["channelID"]       = channelID;
+    root["channelGroupID"]  = channelGroupID;
+    root["clientID"]        = clientID;
+    root["invokerClientID"] = invokerClientID;
+    root["invokerName"]     = invokerName;
+    root["invokerUID"]      = invokerUID;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 int32_t ts3plugin_onServerPermissionErrorEvent(uint64_t schandlerID,
                                                ccstring_t errorMessage,
                                                uint32_t error,
                                                ccstring_t returnCode,
                                                uint32_t failedPermissionID) {
     json root;
-    root["tag"]         = "ServerPermissionError";
-    root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]                = "ServerPermissionError";
+    root["schandlerID"]        = schandlerID;
+    root["errorMessage"]       = errorMessage;
+    root["error"]              = error;
+    root["returnCode"]         = returnCode;
+    root["failedPermissionID"] = failedPermissionID;
     rpc_server->send_event(root);
     return 0; // See onServerErrorEvent for return code description
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onPermissionListGroupEndIDEvent(uint64_t schandlerID,
                                                uint32_t groupEndID) {
     json root;
     root["tag"]         = "PermissionListGroupEndID";
     root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["groupEndID"]  = groupEndID;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onPermissionListEvent(uint64_t schandlerID,
                                      uint32_t permissionID,
                                      ccstring_t permissionName,
                                      ccstring_t permissionDescription) {
     json root;
-    root["tag"]         = "PermissionList";
-    root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]                   = "PermissionList";
+    root["schandlerID"]           = schandlerID;
+    root["permissionID"]          = permissionID;
+    root["permissionName"]        = permissionName;
+    root["permissionDescription"] = permissionDescription;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onPermissionListFinishedEvent(uint64_t schandlerID) {
     json root;
     root["tag"]         = "PermissionListFinished";
     root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onPermissionOverviewEvent(uint64_t schandlerID,
                                          uint64_t clientDBID,
                                          uint64_t channelID,
@@ -1366,23 +1535,29 @@ void ts3plugin_onPermissionOverviewEvent(uint64_t schandlerID,
                                          int32_t permissionNegated,
                                          int32_t permissionSkip) {
     json root;
-    root["tag"]         = "PermissionOverview";
-    root["schandlerID"] = schandlerID;
-    root["channelID"]   = channelID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]               = "PermissionOverview";
+    root["schandlerID"]       = schandlerID;
+    root["channelID"]         = channelID;
+    root["clientDBID"]        = clientDBID;
+    root["overviewType"]      = overviewType;
+    root["overviewID1"]       = overviewID1;
+    root["overviewID2"]       = overviewID2;
+    root["permissionID"]      = permissionID;
+    root["permissionValue"]   = permissionValue;
+    root["permissionNegated"] = permissionNegated;
+    root["permissionSkip"]    = permissionSkip;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onPermissionOverviewFinishedEvent(uint64_t schandlerID) {
     json root;
     root["tag"]         = "PermissionOverviewFinished";
     root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onServerGroupClientAddedEvent(uint64_t schandlerID,
                                              ident_t clientID,
                                              ccstring_t clientName,
@@ -1392,13 +1567,19 @@ void ts3plugin_onServerGroupClientAddedEvent(uint64_t schandlerID,
                                              ccstring_t invokerName,
                                              ccstring_t invokerUID) {
     json root;
-    root["tag"]         = "ServerGroupClientAddedEvent";
-    root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]             = "ServerGroupClientAdded";
+    root["schandlerID"]     = schandlerID;
+    root["clientID"]        = clientID;
+    root["clientName"]      = clientName;
+    root["clientUID"]       = clientUID;
+    root["serverGroupID"]   = serverGroupID;
+    root["invokerClientID"] = invokerClientID;
+    root["invokerName"]     = invokerName;
+    root["invokerUID"]      = invokerUID;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onServerGroupClientDeletedEvent(uint64_t schandlerID,
                                                ident_t clientID,
                                                ccstring_t clientName,
@@ -1408,88 +1589,109 @@ void ts3plugin_onServerGroupClientDeletedEvent(uint64_t schandlerID,
                                                ccstring_t invokerName,
                                                ccstring_t invokerUID) {
     json root;
-    root["tag"]         = "ServerGroupClientDeleted";
-    root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]             = "ServerGroupClientDeleted";
+    root["schandlerID"]     = schandlerID;
+    root["clientID"]        = clientID;
+    root["clientName"]      = clientName;
+    root["clientUID"]       = clientUID;
+    root["serverGroupID"]   = serverGroupID;
+    root["invokerClientID"] = invokerClientID;
+    root["invokerName"]     = invokerName;
+    root["invokerUID"]      = invokerUID;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onClientNeededPermissionsEvent(uint64_t schandlerID,
                                               uint32_t permissionID,
                                               int32_t permissionValue) {
     json root;
-    root["tag"]         = "ClientNeededPermissions";
-    root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]             = "ClientNeededPermissions";
+    root["schandlerID"]     = schandlerID;
+    root["permissionID"]    = permissionID;
+    root["permissionValue"] = permissionValue;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onClientNeededPermissionsFinishedEvent(uint64_t schandlerID) {
     json root;
     root["tag"]         = "ClientNeededPermissionsFinished";
     root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onFileTransferStatusEvent(ident_t transferID,
                                          uint32_t status,
                                          ccstring_t statusMessage,
-                                         uint64_t remotefileSize,
+                                         uint64_t remoteFileSize,
                                          uint64_t schandlerID) {
     json root;
-    root["tag"]         = "FileTransferStatus";
-    root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]            = "FileTransferStatus";
+    root["schandlerID"]    = schandlerID;
+    root["transferID"]     = transferID;
+    root["status"]         = status;
+    root["statusMessage"]  = statusMessage;
+    root["remoteFileSize"] = remoteFileSize;
     rpc_server->send_event(root);
+
+    // std::string fileName = "";
+    // {
+    //     char* temp;
+    //     ts3Functions.getTransferFileName(transferID, &temp);
+    //     fileName = std::string(strdup(temp));
+    //     ts3Functions.freeMemory(temp);
+    // }
+    // std::cout << "\n\nFILE NAME: " << fileName << "\n\n\n";
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onClientChatClosedEvent(uint64_t schandlerID,
                                        ident_t clientID,
                                        ccstring_t clientUID) {
     json root;
     root["tag"]         = "ClientChatClosed";
     root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["clientID"]    = clientID;
+    root["clientUID"]   = clientUID;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onClientChatComposingEvent(uint64_t schandlerID,
                                           ident_t clientID,
                                           ccstring_t clientUID) {
     json root;
     root["tag"]         = "ClientChatComposing";
     root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["clientID"]    = clientID;
+    root["clientUID"]   = clientUID;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onServerLogEvent(uint64_t schandlerID, ccstring_t logMsg) {
     json root;
     root["tag"]         = "ServerLog";
     root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["logMsg"]      = logMsg;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onServerLogFinishedEvent(uint64_t schandlerID,
                                         uint64_t lastPos,
                                         uint64_t fileSize) {
     json root;
     root["tag"]         = "ServerLogFinished";
     root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["lastPos"]     = lastPos;
+    root["fileSize"]    = fileSize;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onMessageListEvent(uint64_t schandlerID,
                                   uint64_t messageID,
                                   ccstring_t fromClientUID,
@@ -1497,13 +1699,17 @@ void ts3plugin_onMessageListEvent(uint64_t schandlerID,
                                   uint64_t timestamp,
                                   int32_t flagRead) {
     json root;
-    root["tag"]         = "MessageList";
-    root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]           = "MessageList";
+    root["schandlerID"]   = schandlerID;
+    root["messageID"]     = messageID;
+    root["fromClientUID"] = fromClientUID;
+    root["subject"]       = subject;
+    root["timestamp"]     = timestamp;
+    root["flagRead"]      = flagRead;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onMessageGetEvent(uint64_t schandlerID,
                                  uint64_t messageID,
                                  ccstring_t fromClientUID,
@@ -1511,63 +1717,77 @@ void ts3plugin_onMessageGetEvent(uint64_t schandlerID,
                                  ccstring_t message,
                                  uint64_t timestamp) {
     json root;
-    root["tag"]         = "MessageGet";
-    root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]           = "MessageGet";
+    root["schandlerID"]   = schandlerID;
+    root["messageID"]     = messageID;
+    root["fromClientUID"] = fromClientUID;
+    root["subject"]       = subject;
+    root["message"]       = message;
+    root["timestamp"]     = timestamp;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onClientDBIDfromUIDEvent(uint64_t schandlerID,
                                         ccstring_t clientUID,
                                         uint64_t clientDBID) {
     json root;
     root["tag"]         = "ClientDBIDFromUID";
     root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["clientUID"]   = clientUID;
+    root["clientDBID"]  = clientDBID;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onClientNamefromUIDEvent(uint64_t schandlerID,
                                         ccstring_t clientUID,
                                         uint64_t clientDBID,
-                                        ccstring_t clientNickName) {
+                                        ccstring_t clientName) {
     json root;
     root["tag"]         = "ClientNameFromUID";
     root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["clientUID"]   = clientUID;
+    root["clientDBID"]  = clientDBID;
+    root["clientName"]  = clientName;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onClientNamefromDBIDEvent(uint64_t schandlerID,
                                          ccstring_t clientUID,
                                          uint64_t clientDBID,
-                                         ccstring_t clientNickName) {
+                                         ccstring_t clientName) {
     json root;
     root["tag"]         = "ClientNameFromDBID";
     root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["clientUID"]   = clientUID;
+    root["clientDBID"]  = clientDBID;
+    root["clientName"]  = clientName;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onComplainListEvent(uint64_t schandlerID,
                                    uint64_t targetClientDBID,
-                                   ccstring_t targetClientNickName,
+                                   ccstring_t targetClientName,
                                    uint64_t fromClientDBID,
-                                   ccstring_t fromClientNickName,
+                                   ccstring_t fromClientName,
                                    ccstring_t complainReason,
                                    uint64_t timestamp) {
     json root;
-    root["tag"]         = "ComplainList";
-    root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]              = "ComplainList";
+    root["schandlerID"]      = schandlerID;
+    root["targetClientDBID"] = targetClientDBID;
+    root["targetClientName"] = targetClientName;
+    root["fromClientDBID"]   = fromClientDBID;
+    root["fromClientName"]   = fromClientName;
+    root["complainReason"]   = complainReason;
+    root["timestamp"]        = timestamp;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onBanListEvent(uint64_t schandlerID,
                               uint64_t banID,
                               ccstring_t ip,
@@ -1580,45 +1800,60 @@ void ts3plugin_onBanListEvent(uint64_t schandlerID,
                               ccstring_t invokeruid,
                               ccstring_t reason,
                               int32_t numberOfEnforcements,
-                              ccstring_t lastNickName) {
+                              ccstring_t lastName) {
     json root;
-    root["tag"]         = "BanList";
-    root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]                  = "BanList";
+    root["schandlerID"]          = schandlerID;
+    root["banID"]                = banID;
+    root["ip"]                   = ip;
+    root["name"]                 = name;
+    root["uid"]                  = uid;
+    root["creationTime"]         = creationTime;
+    root["durationTime"]         = durationTime;
+    root["invokerName"]          = invokerName;
+    root["invokercldbid"]        = invokercldbid;
+    root["invokeruid"]           = invokeruid;
+    root["reason"]               = reason;
+    root["numberOfEnforcements"] = numberOfEnforcements;
+    root["lastName"]             = lastName;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onClientServerQueryLoginPasswordEvent(uint64_t schandlerID,
                                                      ccstring_t password) {
     json root;
     root["tag"]         = "ClientServerQueryLoginPassword";
     root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["password"]    = password;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onPluginCommandEvent(uint64_t schandlerID,
                                     ccstring_t pluginName,
                                     ccstring_t pluginCommand) {
-    // FIXME: cleanup
-    printf("ON PLUGIN COMMAND: %s %s\n", pluginName, pluginCommand);
+    json root;
+    root["tag"]           = "PluginCommand";
+    root["schandlerID"]   = schandlerID;
+    root["pluginName"]    = pluginName;
+    root["pluginCommand"] = pluginCommand;
+    rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onIncomingClientQueryEvent(uint64_t schandlerID,
                                           ccstring_t commandText) {
     json root;
     root["tag"]         = "IncomingClientQuery";
     root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["commandText"] = commandText;
     rpc_server->send_event(root);
 }
 
-//! FIXME: doc
+//! TODO: doc
 void ts3plugin_onServerTemporaryPasswordListEvent(uint64_t schandlerID,
-                                                  ccstring_t clientNickname,
+                                                  ccstring_t clientName,
                                                   ccstring_t clientUID,
                                                   ccstring_t description,
                                                   ccstring_t password,
@@ -1627,9 +1862,16 @@ void ts3plugin_onServerTemporaryPasswordListEvent(uint64_t schandlerID,
                                                   uint64_t targetChannelID,
                                                   ccstring_t targetChannelPW) {
     json root;
-    root["tag"]         = "ServerTemporaryPasswordList";
-    root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]             = "ServerTemporaryPasswordList";
+    root["schandlerID"]     = schandlerID;
+    root["clientName"]      = clientName;
+    root["clientUID"]       = clientUID;
+    root["description"]     = description;
+    root["password"]        = password;
+    root["timestampStart"]  = timestampStart;
+    root["timestampEnd"]    = timestampEnd;
+    root["targetChannelID"] = targetChannelID;
+    root["targetChannelPW"] = targetChannelPW;
     rpc_server->send_event(root);
 }
 
@@ -1644,10 +1886,14 @@ void ts3plugin_onServerTemporaryPasswordListEvent(uint64_t schandlerID,
 void ts3plugin_onAvatarUpdated(uint64_t schandlerID,
                                ident_t clientID,
                                ccstring_t avatarPath) {
-    // FIXME: implement
-    // If avatarPath is NULL, the avatar got deleted
-    // If not NULL, avatarPath contains the path to the avatar file in the
-    // TS3Client cache.
+    json root;
+    root["tag"]         = avatarPath ? "AvatarUpdated" : "AvatarDeleted";
+    root["schandlerID"] = schandlerID;
+    root["clientID"]    = clientID;
+    if(avatarPath) {
+        root["avatarPath"] = avatarPath;
+    }
+    rpc_server->send_event(root);
 }
 
 //! Called when a plugin menu item (see ts3plugin_initMenus) is triggered.
@@ -1666,9 +1912,11 @@ void ts3plugin_onMenuItemEvent(uint64_t schandlerID,
                                int32_t menuItemID,
                                uint64_t selectedItemID) {
     json root;
-    root["tag"]         = "MenuItem";
-    root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["tag"]            = "MenuItem";
+    root["schandlerID"]    = schandlerID;
+    root["type"]           = type;
+    root["menuItemID"]     = menuItemID;
+    root["selectedItemID"] = selectedItemID;
     rpc_server->send_event(root);
 }
 
@@ -1685,8 +1933,9 @@ void ts3plugin_onHotkeyEvent(ccstring_t keyword) {
 //! ts3Functions.requestHotkeyInputDialog
 void ts3plugin_onHotkeyRecordedEvent(ccstring_t keyword, ccstring_t key) {
     json root;
-    root["tag"] = "HotkeyRecorded";
-    // FIXME: add rest of key-value pairs
+    root["tag"]     = "HotkeyRecorded";
+    root["keyword"] = keyword;
+    root["key"]     = key;
     rpc_server->send_event(root);
 }
 
@@ -1698,6 +1947,8 @@ void ts3plugin_onClientDisplayNameChanged(uint64_t schandlerID,
     json root;
     root["tag"]         = "ClientDisplayNameChanged";
     root["schandlerID"] = schandlerID;
-    // FIXME: add rest of key-value pairs
+    root["clientID"]    = clientID;
+    root["displayName"] = displayName;
+    root["clientUID"]   = clientUID;
     rpc_server->send_event(root);
 }

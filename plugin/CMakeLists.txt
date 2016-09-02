@@ -4,7 +4,7 @@ project(TEAMSPEAK_ZEROMQ_PLUGIN)
 add_subdirectory(doc)
 
 find_package(PkgConfig REQUIRED)
-find_package(Boost     REQUIRED program_options thread)
+find_package(Boost     REQUIRED program_options thread filesystem)
 
 pkg_check_modules(ZMQ REQUIRED libzmq)
 pkg_check_modules(MSG REQUIRED msgpack)
